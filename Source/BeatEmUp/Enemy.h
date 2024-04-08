@@ -24,6 +24,14 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float CurrentHealth = MaxHealth;
+	
+	UPROPERTY(EditAnywhere)
+    float DamageToPlayer = 10;
+	
+    UPROPERTY(EditAnywhere)
+    float RagdollTime = 5;
+	
+    FTimerHandle RagdollTimerHandle;
 
 protected:
 	// Called when the game starts or when spawned
@@ -45,4 +53,9 @@ public:
 		UPrimitiveComponent* OtherComp,
 		FVector Normal,
 		const FHitResult& Hit);
+
+	void Ragdoll();
+	
+    UFUNCTION()
+    void StopRagdoll();
 };

@@ -1,6 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "BeatEmUpCharacter.h"
+
+#include "Enemy.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -69,6 +71,60 @@ void ABeatEmUpCharacter::BeginPlay()
 	}
 }
 
+void ABeatEmUpCharacter::Punch()
+{
+	if(bPunchReady)
+    {
+		bPunchReady = false;
+		GetWorld()->GetTimerManager().SetTimer(
+			PunchTimerHandle,
+			this,
+			&ABeatEmUpCharacter::ResetPunch,
+			PunchCooldown,
+			false);
+
+		TArray<FHitResult> HitResults;
+        const FVector Start = GetActorLocation();
+        const FVector End = Start + GetActorForwardVector() * PunchDistance;
+        const FCollisionShape CubeShape = FCollisionShape::MakeBox(FVector(PunchDistance));
+        const bool bSweep = GetWorld()->SweepMultiByChannel(HitResults,
+        	End,
+        	End,
+        	GetActorQuat(),
+        	ECC_WorldDynamic,
+        	CubeShape);
+
+		TArray<AActor*> HitThisPunch;
+		for(FHitResult HitResult : HitResults)
+		{
+			if (HitResult.GetActor() != this && !HitThisPunch.Contains(HitResult.GetActor()))
+			{
+				HitThisPunch.Add(HitResult.GetActor());
+				if (AEnemy* HitEnemy = Cast<AEnemy>(HitResult.GetActor()))
+				{
+					HitEnemy->Ragdoll();
+					FVector LaunchDirection = HitEnemy->GetActorLocation() - GetActorLocation();
+					LaunchDirection.Normalize();
+					LaunchDirection *= 3;
+					LaunchDirection += FVector::UpVector;
+					HitEnemy->GetMesh()->AddImpulse(LaunchDirection * PunchForce);
+					HitEnemy->DealDamage(PunchDamage);
+				}
+			}
+		}
+    }
+}
+
+void ABeatEmUpCharacter::ResetPunch()
+{
+	bPunchReady = true;
+}
+
+void ABeatEmUpCharacter::DealDamage(float Damage)
+{
+	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0, MaxHealth);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -86,6 +142,9 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABeatEmUpCharacter::Look);
+
+		// Punch
+		EnhancedInputComponent->BindAction(PunchAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::Punch);
 	}
 	else
 	{
