@@ -34,6 +34,7 @@ void AEnemy::Tick(float DeltaTime)
 		const FVector TowardsPlayer = Player->GetActorLocation() - GetActorLocation();
 		AddMovementInput(TowardsPlayer);
 	}
+	
 }
 
 // Called to bind functionality to input
