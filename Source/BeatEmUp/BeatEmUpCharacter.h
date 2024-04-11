@@ -68,6 +68,12 @@ public:
     UPROPERTY(EditAnywhere)
     float PunchCooldown = 1;
 
+	UPROPERTY(EditAnywhere)
+    UInputAction* UseAction;
+	
+    UPROPERTY(EditAnywhere)
+    float UseDistance = 1000;
+
 	bool bPunchReady = true;
 	
     FTimerHandle PunchTimerHandle;
@@ -99,6 +105,9 @@ public:
 	
     UFUNCTION()
     void ResetPunch();
+	
+    UFUNCTION()
+    void Use();
 	
     void DealDamage(float Damage);
 };

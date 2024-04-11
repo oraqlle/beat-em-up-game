@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Interactable.h"
 #include "GameFramework/Actor.h"
 #include "GravityWell.generated.h"
 
@@ -16,7 +17,7 @@ enum class EGravityType:uint8
 };
 
 UCLASS()
-class BEATEMUP_API AGravityWell : public AActor
+class BEATEMUP_API AGravityWell : public AActor, public IInteractable
 {
 	GENERATED_BODY()
 	
@@ -43,6 +44,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void Interact_Implementation() override;
 
 	void Activate();
 };

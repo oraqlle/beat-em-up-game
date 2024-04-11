@@ -12,6 +12,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Interactable.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -120,6 +121,42 @@ void ABeatEmUpCharacter::ResetPunch()
 	bPunchReady = true;
 }
 
+void ABeatEmUpCharacter::Use()
+{
+	FVector Start = GetActorLocation();
+    FVector End = Start + GetFollowCamera()->GetForwardVector() * UseDistance;
+	
+    FHitResult HitData;
+	
+    TArray<AActor*> ActorsToIgnore;
+    ActorsToIgnore.Add(this);
+	
+	FCollisionQueryParams TraceParams;
+    TraceParams.bTraceComplex = true;
+    TraceParams.bReturnPhysicalMaterial = false;
+    TraceParams.AddIgnoredActors(ActorsToIgnore);
+    TraceParams.TraceTag = FName("Use Trace Tag");
+    GetWorld()->DebugDrawTraceTag = TraceParams.TraceTag;
+	
+    bool bSweep = GetWorld()->LineTraceSingleByChannel(HitData, Start, End, ECC_Visibility, TraceParams);
+
+	if (bSweep) {
+		if (HitData.GetActor()) {
+			UE_LOG(LogTemp, Warning, TEXT("We hit: %s"), *HitData.GetActor()->GetName());
+			
+			if (HitData.GetActor()->GetClass()->ImplementsInterface(UInteractable::StaticClass())) {
+				IInteractable::Execute_Interact(HitData.GetActor());
+			} else {
+				UE_LOG(LogTemp, Warning, TEXT("Actor not interactable!"));
+			}
+		} else {
+			UE_LOG(LogTemp, Warning, TEXT("What happened!?"));
+		}
+    } else {
+		UE_LOG(LogTemp, Warning, TEXT("Didn't hit an actor!"));
+    }
+}
+
 void ABeatEmUpCharacter::DealDamage(float Damage)
 {
 	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0, MaxHealth);
@@ -145,6 +182,9 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Punch
 		EnhancedInputComponent->BindAction(PunchAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::Punch);
+
+		// Interact
+		EnhancedInputComponent->BindAction(UseAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::Use);
 	}
 	else
 	{

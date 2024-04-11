@@ -29,6 +29,13 @@ void AGravityWell::Tick(float DeltaTime)
 
 }
 
+void AGravityWell::Interact_Implementation()
+{
+	IInteractable::Interact_Implementation();
+
+	Activate();
+}
+
 void AGravityWell::Activate()
 {
 	TArray<FHitResult> Hits;
@@ -48,49 +55,50 @@ void AGravityWell::Activate()
 			if (!HitActors.Contains(Hit.GetActor())) {
 				HitActors.Add(Hit.GetActor());
 				UMeshComponent* HitMesh;
+				AEnemy* HitEnemy = Cast<AEnemy>(Hit.GetActor());
 				
-				if (AEnemy* HitEnemy = Cast<AEnemy>(Hit.GetActor())) {
+				if (HitEnemy) {
 					HitMesh = Cast<UMeshComponent>(HitEnemy->GetMesh());
 					HitEnemy->Ragdoll();
 				} else {
 					HitMesh = Cast<UMeshComponent>(Hit.GetActor()->GetRootComponent());
-					
-					if (HitMesh)
-                    {
-						switch (GravityType)
+				}
+
+				if (HitMesh)
+				{
+					switch (GravityType)
+					{
+					case EGravityType::GE_Pull:
+						HitMesh->AddRadialImpulse(
+							GetActorLocation(),
+							SweepSize,
+							-Force,
+							RIF_Linear,
+							true);
+						break;
+					case EGravityType::GE_Push:
+						HitMesh->AddRadialImpulse(
+							GetActorLocation(),
+							SweepSize,
+							Force,
+							RIF_Linear,
+							true);
+						break;
+					case EGravityType::GE_On:
+						if (!HitEnemy)
 						{
-						case EGravityType::GE_Pull:
-							HitMesh->AddRadialImpulse(
-								GetActorLocation(),
-								SweepSize,
-								-Force,
-								RIF_Linear,
-								true);
-							break;
-						case EGravityType::GE_Push:
-							HitMesh->AddRadialImpulse(
-								GetActorLocation(),
-								SweepSize,
-								Force,
-								RIF_Linear,
-								true);
-							break;
-						case EGravityType::GE_On:
-							if(!HitEnemy)
-							{
-								HitMesh->SetEnableGravity(true);
-							}
-							break;
-						case EGravityType::GE_Off:
-							if(!HitEnemy)
-							{
-								HitMesh->SetEnableGravity(false);
-							}
-							break;
-						default:
-							UE_LOG(LogTemp, Warning, TEXT("No Gravity Type! How did this happen!?"));
+							HitMesh->SetEnableGravity(true);
 						}
-                    }
+						break;
+					case EGravityType::GE_Off:
+						if (!HitEnemy)
+						{
+							HitMesh->SetEnableGravity(false);
+						}
+						break;
+					default:
+						UE_LOG(LogTemp, Warning, TEXT("No Gravity Type! How did this happen!?"));
+					}
 				}
 			}
 		}
