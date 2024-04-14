@@ -63,7 +63,7 @@ void ABeatEmUpCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	//Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	if (const APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
@@ -88,7 +88,7 @@ void ABeatEmUpCharacter::Punch()
         const FVector Start = GetActorLocation();
         const FVector End = Start + GetActorForwardVector() * PunchDistance;
         const FCollisionShape CubeShape = FCollisionShape::MakeBox(FVector(PunchDistance));
-        const bool bSweep = GetWorld()->SweepMultiByChannel(HitResults,
+		[[maybe_unused]] const bool bSweep = GetWorld()->SweepMultiByChannel(HitResults,
         	End,
         	End,
         	GetActorQuat(),
@@ -121,6 +121,11 @@ void ABeatEmUpCharacter::ResetPunch()
 	bPunchReady = true;
 }
 
+void ABeatEmUpCharacter::DealDamage(const float Damage)
+{
+	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0, MaxHealth);
+}
+
 void ABeatEmUpCharacter::Use()
 {
 	FVector Start = GetActorLocation();
@@ -137,10 +142,8 @@ void ABeatEmUpCharacter::Use()
     TraceParams.AddIgnoredActors(ActorsToIgnore);
     TraceParams.TraceTag = FName("Use Trace Tag");
     GetWorld()->DebugDrawTraceTag = TraceParams.TraceTag;
-	
-    bool bSweep = GetWorld()->LineTraceSingleByChannel(HitData, Start, End, ECC_Visibility, TraceParams);
 
-	if (bSweep) {
+	if (bool bSweep = GetWorld()->LineTraceSingleByChannel(HitData, Start, End, ECC_Visibility, TraceParams)) {
 		if (HitData.GetActor()) {
 			UE_LOG(LogTemp, Warning, TEXT("We hit: %s"), *HitData.GetActor()->GetName());
 			
@@ -157,9 +160,20 @@ void ABeatEmUpCharacter::Use()
     }
 }
 
-void ABeatEmUpCharacter::DealDamage(float Damage)
+void ABeatEmUpCharacter::StartChargeDash()
 {
-	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0, MaxHealth);
+}
+
+void ABeatEmUpCharacter::OngoingChargeDash(const FInputActionInstance& Instance)
+{
+}
+
+void ABeatEmUpCharacter::CancelChargeDash()
+{
+}
+
+void ABeatEmUpCharacter::Dash()
+{
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -183,8 +197,13 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		// Punch
 		EnhancedInputComponent->BindAction(PunchAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::Punch);
 
-		// Interact
+		// Interact/Use
 		EnhancedInputComponent->BindAction(UseAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::Use);
+
+		// Dash Attack
+		// Add binding for when hold starts
+		// Add binding for ongoing to increment hold duration
+		// Add binding for dash button is released (cancelled)
 	}
 	else
 	{

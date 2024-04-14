@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputAction.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "BeatEmUpCharacter.generated.h"
@@ -67,17 +68,29 @@ public:
 	
     UPROPERTY(EditAnywhere)
     float PunchCooldown = 1;
+	
+	bool bPunchReady = true;
+	
+    FTimerHandle PunchTimerHandle;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Input)
     UInputAction* UseAction;
 	
     UPROPERTY(EditAnywhere)
     float UseDistance = 1000;
 
-	bool bPunchReady = true;
-	
-    FTimerHandle PunchTimerHandle;
-	
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* DashAction;
+
+	UPROPERTY(EditAnywhere)
+	float DashChargeTime;
+
+	bool bDashRead;
+
+	bool bDashHold;
+
+	float DashHoldProgress;
+
 protected:
 
 	/** Called for movement input */
@@ -106,9 +119,20 @@ public:
     UFUNCTION()
     void ResetPunch();
 	
+    void DealDamage(float Damage);
+	
     UFUNCTION()
     void Use();
-	
-    void DealDamage(float Damage);
+
+	UFUNCTION()
+	void StartChargeDash();
+
+	UFUNCTION()
+	void OngoingChargeDash(const FInputActionInstance& Instance);
+
+	UFUNCTION()
+	void CancelChargeDash();
+
+	void Dash();
 };
 
