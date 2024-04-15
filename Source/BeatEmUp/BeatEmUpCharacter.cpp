@@ -162,59 +162,71 @@ void ABeatEmUpCharacter::Use()
 
 void ABeatEmUpCharacter::StartChargeDash()
 {
-	if (!bDashReady || bDashing) { return; }
-
-	bDashReady = false;
-	bDashHold = true;
-	
-	GetWorld()->GetTimerManager().SetTimer(
-		DashCooldownTimerHandle,
-		this,
-		&ABeatEmUpCharacter::ResetDash,
-		DashCooldown,
-		false);
+	// if (!bDashReady) { return; }
+	if (GEngine) {
+    		GEngine->AddOnScreenDebugMessage(
+    			3,
+    			2.f,
+    			FColor::Green,
+    			TEXT("Dash charging started"));
+    	}
 }
 
-void ABeatEmUpCharacter::OngoingChargeDash(const FInputActionInstance& Instance)
+void ABeatEmUpCharacter::ChargeDash(const FInputActionInstance& Instance)
 {	
-	if (DashChargeScaler < DashChargeLimit && GEngine) {
-		DashChargeScaler += 25.f * Instance.GetElapsedTime();
+	if (!bDashReady) { return; }
+	
+	if (DashChargeScaler < DashChargeLimit) {
+		DashChargeScaler += DashChargeRate * Instance.GetElapsedTime();
 	}
 
-	GEngine->AddOnScreenDebugMessage(
-		1,
-	2.0f,
-		FColor::Yellow,
-		FString::Printf(
-			TEXT("Dash charge: [%.2f%%]"),
-			FMath::Clamp((DashChargeScaler / DashChargeLimit) * 100.f, 0.f, 100.f)));
+	if (GEngine) {
+		GEngine->AddOnScreenDebugMessage(
+			1,
+			2.0f,
+			FColor::Yellow,
+			FString::Printf(
+				TEXT("Dash charging: [%.2f%%]"),
+				FMath::Clamp((DashChargeScaler / DashChargeLimit) * 100.f, 0.f, 100.f)));
+	}
 }
 
 void ABeatEmUpCharacter::ReleaseChargeDash()
 {
-	if (DashChargeScaler >= DashChargeLimit) {
-		bDashing = true;
-		bDashHold = false;
-		
-		const FVector DashVel = GetActorForwardVector() * 1000;
-		LaunchCharacter(DashVel, false, false);
+	if (!bDashReady) { return; }
+
+	if (GEngine) {
+		GEngine->AddOnScreenDebugMessage(
+			2,
+			2.f,
+			FColor::Green,
+			FString::Printf(TEXT("Dashing force: %.3f"), DashChargeScaler));
 	}
 	
-	DashChargeScaler = 0.f;
-}
+	bDashing = true;
+	
+	FVector DashVel = GetActorForwardVector();
+	DashVel.Normalize();
+	// DashVel *= 100000;
+	DashVel *= DashChargeScaler;
+	LaunchCharacter(DashVel, false, false);
 
-void ABeatEmUpCharacter::CancelChargeDash()
-{
-	// Force reset on cancel
-	DashCooldownTimerHandle.Invalidate();
+	bDashReady = false;
 	bDashHold = false;
-	ResetDash();
+	DashChargeScaler = 0.f;
+	
+	GetWorld()->GetTimerManager().SetTimer(
+			DashCooldownTimerHandle,
+			this,
+			&ABeatEmUpCharacter::ResetDash,
+			DashCooldown,
+			false);
+	
 }
 
 void ABeatEmUpCharacter::ResetDash()
 {
 	bDashReady = true;
-	DashChargeScaler = 0.f;
 }
 
 void ABeatEmUpCharacter::Dash()
@@ -250,14 +262,12 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::StartChargeDash);
 		
 		// Add binding for ongoing to increment hold duration
-		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Ongoing, this, &ABeatEmUpCharacter::OngoingChargeDash);
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &ABeatEmUpCharacter::ChargeDash);
 
 		// Add binding for when dash gets released
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Completed, this, &ABeatEmUpCharacter::ReleaseChargeDash);
 		
-		// Add binding for dash cancel button is pressed
-		// TODO Bind to different key
-		// EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Canceled, this, &ABeatEmUpCharacter::CancelChargeDash);
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Canceled, this, &ABeatEmUpCharacter::ResetDash);
 	}
 	else
 	{

@@ -83,10 +83,13 @@ public:
 	UInputAction* DashAction;
 
 	UPROPERTY(EditAnywhere)
-	float DashChargeLimit = 2000.f;
+	float DashChargeLimit = 5000.f;
 	
 	UPROPERTY(EditAnywhere)
 	float DashCooldown = 5.f;
+
+	UPROPERTY(EditAnywhere)
+	float DashChargeRate = 450.f;
 
 	bool bDashReady = true;
 	
@@ -135,13 +138,10 @@ public:
 	void StartChargeDash();
 
 	UFUNCTION()
-	void OngoingChargeDash(const FInputActionInstance& Instance);
+	void ChargeDash(const FInputActionInstance& Instance);
 
 	UFUNCTION()
-	void ReleaseChargeDash();
-
-	UFUNCTION()
-	void CancelChargeDash();
+	void ReleaseChargeDash();	
 
 	UFUNCTION()
 	void ResetDash();
