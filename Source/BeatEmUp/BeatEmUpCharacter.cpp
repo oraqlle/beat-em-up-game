@@ -162,6 +162,7 @@ void ABeatEmUpCharacter::Use()
 
 void ABeatEmUpCharacter::StartChargeDash()
 {
+	Dash();
 }
 
 void ABeatEmUpCharacter::OngoingChargeDash(const FInputActionInstance& Instance)
@@ -174,6 +175,8 @@ void ABeatEmUpCharacter::CancelChargeDash()
 
 void ABeatEmUpCharacter::Dash()
 {
+	const FVector DashVel = GetActorForwardVector() * 1000;
+	LaunchCharacter(DashVel, false, false);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -202,8 +205,13 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Dash Attack
 		// Add binding for when hold starts
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::StartChargeDash);
+		
 		// Add binding for ongoing to increment hold duration
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Ongoing, this, &ABeatEmUpCharacter::OngoingChargeDash);
+		
 		// Add binding for dash button is released (cancelled)
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Canceled, this, &ABeatEmUpCharacter::CancelChargeDash);
 	}
 	else
 	{
