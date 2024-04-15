@@ -67,11 +67,11 @@ public:
     float PunchDamage = 50;
 	
     UPROPERTY(EditAnywhere)
-    float PunchCooldown = 1;
+    float PunchCooldown = 1.f;
 	
 	bool bPunchReady = true;
 	
-    FTimerHandle PunchTimerHandle;
+    FTimerHandle PunchCooldownTimerHandle;
 
 	UPROPERTY(EditAnywhere, Category = Input)
     UInputAction* UseAction;
@@ -83,13 +83,20 @@ public:
 	UInputAction* DashAction;
 
 	UPROPERTY(EditAnywhere)
-	float DashChargeTime;
+	float DashChargeLimit = 2000.f;
+	
+	UPROPERTY(EditAnywhere)
+	float DashCooldown = 5.f;
 
-	bool bDashRead;
+	bool bDashReady = true;
+	
+	bool bDashing = false;
 
-	bool bDashHold;
+	bool bDashHold = false;
 
-	float DashHoldProgress;
+	float DashChargeScaler = 0.f;
+	
+	FTimerHandle DashCooldownTimerHandle;
 
 protected:
 
@@ -131,7 +138,13 @@ public:
 	void OngoingChargeDash(const FInputActionInstance& Instance);
 
 	UFUNCTION()
+	void ReleaseChargeDash();
+
+	UFUNCTION()
 	void CancelChargeDash();
+
+	UFUNCTION()
+	void ResetDash();
 
 	void Dash();
 };

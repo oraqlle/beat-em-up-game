@@ -78,7 +78,7 @@ void ABeatEmUpCharacter::Punch()
     {
 		bPunchReady = false;
 		GetWorld()->GetTimerManager().SetTimer(
-			PunchTimerHandle,
+			PunchCooldownTimerHandle,
 			this,
 			&ABeatEmUpCharacter::ResetPunch,
 			PunchCooldown,
@@ -162,21 +162,63 @@ void ABeatEmUpCharacter::Use()
 
 void ABeatEmUpCharacter::StartChargeDash()
 {
-	Dash();
+	if (!bDashReady || bDashing) { return; }
+
+	bDashReady = false;
+	bDashHold = true;
+	
+	GetWorld()->GetTimerManager().SetTimer(
+		DashCooldownTimerHandle,
+		this,
+		&ABeatEmUpCharacter::ResetDash,
+		DashCooldown,
+		false);
 }
 
 void ABeatEmUpCharacter::OngoingChargeDash(const FInputActionInstance& Instance)
+{	
+	if (DashChargeScaler < DashChargeLimit && GEngine) {
+		DashChargeScaler += 25.f * Instance.GetElapsedTime();
+	}
+
+	GEngine->AddOnScreenDebugMessage(
+		1,
+	2.0f,
+		FColor::Yellow,
+		FString::Printf(
+			TEXT("Dash charge: [%.2f%%]"),
+			FMath::Clamp((DashChargeScaler / DashChargeLimit) * 100.f, 0.f, 100.f)));
+}
+
+void ABeatEmUpCharacter::ReleaseChargeDash()
 {
+	if (DashChargeScaler >= DashChargeLimit) {
+		bDashing = true;
+		bDashHold = false;
+		
+		const FVector DashVel = GetActorForwardVector() * 1000;
+		LaunchCharacter(DashVel, false, false);
+	}
+	
+	DashChargeScaler = 0.f;
 }
 
 void ABeatEmUpCharacter::CancelChargeDash()
 {
+	// Force reset on cancel
+	DashCooldownTimerHandle.Invalidate();
+	bDashHold = false;
+	ResetDash();
+}
+
+void ABeatEmUpCharacter::ResetDash()
+{
+	bDashReady = true;
+	DashChargeScaler = 0.f;
 }
 
 void ABeatEmUpCharacter::Dash()
 {
-	const FVector DashVel = GetActorForwardVector() * 1000;
-	LaunchCharacter(DashVel, false, false);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -209,9 +251,13 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		
 		// Add binding for ongoing to increment hold duration
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Ongoing, this, &ABeatEmUpCharacter::OngoingChargeDash);
+
+		// Add binding for when dash gets released
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Completed, this, &ABeatEmUpCharacter::ReleaseChargeDash);
 		
-		// Add binding for dash button is released (cancelled)
-		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Canceled, this, &ABeatEmUpCharacter::CancelChargeDash);
+		// Add binding for dash cancel button is pressed
+		// TODO Bind to different key
+		// EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Canceled, this, &ABeatEmUpCharacter::CancelChargeDash);
 	}
 	else
 	{
