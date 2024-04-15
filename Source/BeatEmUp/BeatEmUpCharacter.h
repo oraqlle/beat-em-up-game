@@ -92,10 +92,6 @@ public:
 	float DashChargeRate = 450.f;
 
 	bool bDashReady = true;
-	
-	bool bDashing = false;
-
-	bool bDashHold = false;
 
 	float DashChargeScaler = 0.f;
 	
@@ -135,9 +131,6 @@ public:
     void Use();
 
 	UFUNCTION()
-	void StartChargeDash();
-
-	UFUNCTION()
 	void ChargeDash(const FInputActionInstance& Instance);
 
 	UFUNCTION()
@@ -145,7 +138,5 @@ public:
 
 	UFUNCTION()
 	void ResetDash();
-
-	void Dash();
 };
 

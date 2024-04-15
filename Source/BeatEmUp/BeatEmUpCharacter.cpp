@@ -160,18 +160,6 @@ void ABeatEmUpCharacter::Use()
     }
 }
 
-void ABeatEmUpCharacter::StartChargeDash()
-{
-	// if (!bDashReady) { return; }
-	if (GEngine) {
-    		GEngine->AddOnScreenDebugMessage(
-    			3,
-    			2.f,
-    			FColor::Green,
-    			TEXT("Dash charging started"));
-    	}
-}
-
 void ABeatEmUpCharacter::ChargeDash(const FInputActionInstance& Instance)
 {	
 	if (!bDashReady) { return; }
@@ -203,8 +191,6 @@ void ABeatEmUpCharacter::ReleaseChargeDash()
 			FString::Printf(TEXT("Dashing force: %.3f"), DashChargeScaler));
 	}
 	
-	bDashing = true;
-	
 	FVector DashVel = GetActorForwardVector();
 	DashVel.Normalize();
 	// DashVel *= 100000;
@@ -212,7 +198,6 @@ void ABeatEmUpCharacter::ReleaseChargeDash()
 	LaunchCharacter(DashVel, false, false);
 
 	bDashReady = false;
-	bDashHold = false;
 	DashChargeScaler = 0.f;
 	
 	GetWorld()->GetTimerManager().SetTimer(
@@ -227,10 +212,6 @@ void ABeatEmUpCharacter::ReleaseChargeDash()
 void ABeatEmUpCharacter::ResetDash()
 {
 	bDashReady = true;
-}
-
-void ABeatEmUpCharacter::Dash()
-{
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -257,16 +238,12 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		// Interact/Use
 		EnhancedInputComponent->BindAction(UseAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::Use);
 
-		// Dash Attack
-		// Add binding for when hold starts
-		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::StartChargeDash);
-		
-		// Add binding for ongoing to increment hold duration
+		// Dash Attack		
+		// Binding for ongoing to increment hold duration
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &ABeatEmUpCharacter::ChargeDash);
-
-		// Add binding for when dash gets released
+		// Binding for when dash gets released
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Completed, this, &ABeatEmUpCharacter::ReleaseChargeDash);
-		
+		// Binding for if key is not pressed for long enough to trigger
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Canceled, this, &ABeatEmUpCharacter::ResetDash);
 	}
 	else
