@@ -163,10 +163,13 @@ void ABeatEmUpCharacter::Use()
 void ABeatEmUpCharacter::ChargeDash(const FInputActionInstance& Instance)
 {	
 	if (!bDashReady) { return; }
-	
-	if (DashChargeScaler < DashChargeLimit) {
-		DashChargeScaler += DashChargeRate * Instance.GetElapsedTime();
-	}
+
+	// Promote comparison to integer and multiply by scale which goes to zero
+	// if condition fails, avoiding cond-branch
+	DashChargeScaler = FMath::Clamp(
+		(DashChargeRate * Instance.GetElapsedTime() * (+(DashChargeScaler < DashChargeLimit))) + DashChargeScaler,
+		0.f,
+		DashChargeLimit);
 
 	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(

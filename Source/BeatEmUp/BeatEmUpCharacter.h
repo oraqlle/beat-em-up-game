@@ -83,13 +83,13 @@ public:
 	UInputAction* DashAction;
 
 	UPROPERTY(EditAnywhere)
-	float DashChargeLimit = 5000.f;
+	float DashChargeLimit = 4000.f;
 	
 	UPROPERTY(EditAnywhere)
 	float DashCooldown = 5.f;
 
 	UPROPERTY(EditAnywhere)
-	float DashChargeRate = 450.f;
+	float DashChargeRate = 350.f;
 
 	bool bDashReady = true;
 
