@@ -58,8 +58,18 @@ void AEnemy::OnHit(
 {
 	if (OtherActor == Player)
     {
-		Player->DealDamage(DamageToPlayer);
-		Destroy();
+		if (Player->bDashing) {
+			FVector LaunchDirection = -GetActorForwardVector();
+			LaunchDirection.Normalize();
+			LaunchDirection += FVector::UpVector;
+			// LaunchCharacter(LaunchDirection * Player->DashChargeScaler, false, false);
+			LaunchCharacter(LaunchDirection * 100000, false, false);
+			DealDamage(Player->DashDamage);
+			// Ragdoll();
+		} else {
+			Player->DealDamage(DamageToPlayer);
+			Destroy();
+		}
     }
 }
 

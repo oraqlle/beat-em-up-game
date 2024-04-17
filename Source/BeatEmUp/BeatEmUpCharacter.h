@@ -91,11 +91,20 @@ public:
 	UPROPERTY(EditAnywhere)
 	float DashChargeRate = 350.f;
 
+	UPROPERTY(EditAnywhere)
+	float DashDamage = 30.f;
+
 	bool bDashReady = true;
+
+	bool bDashing = false;
+
+	bool bDashResetting;
 
 	float DashChargeScaler = 0.f;
 	
 	FTimerHandle DashCooldownTimerHandle;
+	
+	FTimerHandle DashTimerHandle;
 
 protected:
 
@@ -138,5 +147,8 @@ public:
 
 	UFUNCTION()
 	void ResetDash();
+
+	UFUNCTION()
+	void IsDashingSwitch();
 };
 

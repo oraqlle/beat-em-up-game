@@ -186,6 +186,8 @@ void ABeatEmUpCharacter::ReleaseChargeDash()
 {
 	if (!bDashReady) { return; }
 
+	bDashing = true;
+
 	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(
 			2,
@@ -196,7 +198,6 @@ void ABeatEmUpCharacter::ReleaseChargeDash()
 	
 	FVector DashVel = GetActorForwardVector();
 	DashVel.Normalize();
-	// DashVel *= 100000;
 	DashVel *= DashChargeScaler;
 	LaunchCharacter(DashVel, false, false);
 
@@ -210,11 +211,22 @@ void ABeatEmUpCharacter::ReleaseChargeDash()
 			DashCooldown,
 			false);
 	
+	GetWorld()->GetTimerManager().SetTimer(
+			DashTimerHandle,
+			this,
+			&ABeatEmUpCharacter::IsDashingSwitch,
+			GetActorLocation().Size() / DashVel.Size(),  // Find time dashing for
+			false);
 }
 
 void ABeatEmUpCharacter::ResetDash()
 {
 	bDashReady = true;
+}
+
+void ABeatEmUpCharacter::IsDashingSwitch()
+{
+	bDashing = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
