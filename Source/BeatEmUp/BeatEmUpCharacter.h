@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InGameUI.h"
 #include "InputAction.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
@@ -78,7 +79,12 @@ public:
 	
     UPROPERTY(EditAnywhere)
     float UseDistance = 1000;
-
+	
+	UPROPERTY(EditAnywhere)
+    TSubclassOf<UInGameUI> InGameUIClass;
+    UPROPERTY()
+    UInGameUI* InGameUI;
+	
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* DashAction;
 
@@ -127,6 +133,8 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	
+    virtual void Tick(float DeltaSeconds) override;
 	
 	UFUNCTION()
     void Punch();

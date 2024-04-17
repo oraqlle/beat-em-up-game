@@ -70,6 +70,21 @@ void ABeatEmUpCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+	
+	InGameUI = Cast<UInGameUI>(CreateWidget(GetGameInstance(), InGameUIClass));
+    InGameUI->Player = this;
+    InGameUI->UpdateValues();
+    InGameUI->AddToViewport();
+}
+
+void ABeatEmUpCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (GetWorld()->GetTimerManager().TimerExists(PunchCooldownTimerHandle))
+    {
+		InGameUI->UpdateValues();
+    }
 }
 
 void ABeatEmUpCharacter::Punch()
@@ -119,11 +134,19 @@ void ABeatEmUpCharacter::Punch()
 void ABeatEmUpCharacter::ResetPunch()
 {
 	bPunchReady = true;
+	InGameUI->UpdateValues();
 }
 
 void ABeatEmUpCharacter::DealDamage(const float Damage)
 {
 	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0, MaxHealth);
+	
+	InGameUI->UpdateValues();
+	
+    if (CurrentHealth == 0)
+    {
+		Cast<APlayerController>(GetController())->RestartLevel();
+    }
 }
 
 void ABeatEmUpCharacter::Use()
