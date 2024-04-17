@@ -85,6 +85,8 @@ void ABeatEmUpCharacter::Tick(float DeltaSeconds)
     {
 		InGameUI->UpdateValues();
     }
+
+	FindUseTarget();
 }
 
 void ABeatEmUpCharacter::Punch()
@@ -151,36 +153,11 @@ void ABeatEmUpCharacter::DealDamage(const float Damage)
 
 void ABeatEmUpCharacter::Use()
 {
-	FVector Start = GetActorLocation();
-    FVector End = Start + GetFollowCamera()->GetForwardVector() * UseDistance;
-	
-    FHitResult HitData;
-	
-    TArray<AActor*> ActorsToIgnore;
-    ActorsToIgnore.Add(this);
-	
-	FCollisionQueryParams TraceParams;
-    TraceParams.bTraceComplex = true;
-    TraceParams.bReturnPhysicalMaterial = false;
-    TraceParams.AddIgnoredActors(ActorsToIgnore);
-    TraceParams.TraceTag = FName("Use Trace Tag");
-    GetWorld()->DebugDrawTraceTag = TraceParams.TraceTag;
-
-	if (bool bSweep = GetWorld()->LineTraceSingleByChannel(HitData, Start, End, ECC_Visibility, TraceParams)) {
-		if (HitData.GetActor()) {
-			UE_LOG(LogTemp, Warning, TEXT("We hit: %s"), *HitData.GetActor()->GetName());
-			
-			if (HitData.GetActor()->GetClass()->ImplementsInterface(UInteractable::StaticClass())) {
-				IInteractable::Execute_Interact(HitData.GetActor());
-			} else {
-				UE_LOG(LogTemp, Warning, TEXT("Actor not interactable!"));
-			}
-		} else {
-			UE_LOG(LogTemp, Warning, TEXT("What happened!?"));
+	if (UseTarget != nullptr) {
+		if (FVector::Distance(UseTarget->GetActorLocation(), GetActorLocation()) <= UseDistance) {
+			IInteractable::Execute_Interact(UseTarget);
 		}
-    } else {
-		UE_LOG(LogTemp, Warning, TEXT("Didn't hit an actor!"));
-    }
+	}
 }
 
 void ABeatEmUpCharacter::ChargeDash(const FInputActionInstance& Instance)
@@ -250,6 +227,51 @@ void ABeatEmUpCharacter::ResetDash()
 void ABeatEmUpCharacter::IsDashingSwitch()
 {
 	bDashing = false;
+}
+
+void ABeatEmUpCharacter::FindUseTarget()
+{
+	FVector Start = GetActorLocation();
+	FVector End = Start + GetFollowCamera()->GetForwardVector() * UseDistance;
+	
+	FHitResult HitData;
+	
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+	
+	FCollisionQueryParams TraceParams;
+	TraceParams.bTraceComplex = true;
+	TraceParams.bReturnPhysicalMaterial = false;
+	TraceParams.AddIgnoredActors(ActorsToIgnore);
+	TraceParams.TraceTag = FName("Use Find Trace Tag");
+	GetWorld()->DebugDrawTraceTag = TraceParams.TraceTag;
+
+	if (bool bSweep = GetWorld()->LineTraceSingleByChannel(HitData, Start, End, ECC_Visibility, TraceParams)) {
+		if (HitData.GetActor()) {
+			UE_LOG(LogTemp, Warning, TEXT("We hit: %s"), *HitData.GetActor()->GetName());
+			
+			if (HitData.GetActor()->GetClass()->ImplementsInterface(UInteractable::StaticClass())) {
+				// Add highlight/text for interaction
+
+				UseTarget = HitData.GetActor();
+				
+				if (GEngine) {
+					GEngine->AddOnScreenDebugMessage(
+						4,
+						2.f,
+						FColor::Purple,
+						TEXT("Found interactable in sight and reach"));
+				}
+				
+			} else {
+				UE_LOG(LogTemp, Warning, TEXT("Actor not interactable!"));
+			}
+		} else {
+			UE_LOG(LogTemp, Warning, TEXT("What happened!?"));
+		}
+	} else {
+		UE_LOG(LogTemp, Warning, TEXT("Didn't hit an actor!"));
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

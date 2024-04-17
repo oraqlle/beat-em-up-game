@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "InGameUI.h"
 #include "InputAction.h"
+#include "Interactable.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "BeatEmUpCharacter.generated.h"
@@ -112,6 +113,8 @@ public:
 	
 	FTimerHandle DashTimerHandle;
 
+	AActor* UseTarget;
+
 protected:
 
 	/** Called for movement input */
@@ -158,5 +161,7 @@ public:
 
 	UFUNCTION()
 	void IsDashingSwitch();
+
+	void FindUseTarget();
 };
 
