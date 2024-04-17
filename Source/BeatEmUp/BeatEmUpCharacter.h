@@ -6,6 +6,7 @@
 #include "InGameUI.h"
 #include "InputAction.h"
 #include "Interactable.h"
+#include "UsePromptUI.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "BeatEmUpCharacter.generated.h"
@@ -82,7 +83,15 @@ public:
     float UseDistance = 1000;
 	
 	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUsePromptUI> UsePromptClass;
+
+	UUsePromptUI* UsePrompt = nullptr;
+	
+	AActor* UseTarget;
+	
+	UPROPERTY(EditAnywhere)
     TSubclassOf<UInGameUI> InGameUIClass;
+	
     UPROPERTY()
     UInGameUI* InGameUI;
 	
@@ -112,9 +121,7 @@ public:
 	FTimerHandle DashCooldownTimerHandle;
 	
 	FTimerHandle DashTimerHandle;
-
-	AActor* UseTarget;
-
+	
 protected:
 
 	/** Called for movement input */

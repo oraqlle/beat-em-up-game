@@ -13,6 +13,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Interactable.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -231,6 +232,12 @@ void ABeatEmUpCharacter::IsDashingSwitch()
 
 void ABeatEmUpCharacter::FindUseTarget()
 {
+	
+	if (UsePrompt) {
+		UsePrompt->RemoveFromParent();
+		UsePrompt = nullptr;
+	}
+	
 	FVector Start = GetActorLocation();
 	FVector End = Start + GetFollowCamera()->GetForwardVector() * UseDistance;
 	
@@ -254,6 +261,20 @@ void ABeatEmUpCharacter::FindUseTarget()
 				// Add highlight/text for interaction
 
 				UseTarget = HitData.GetActor();
+
+				FVector2D TextLocation = FVector2D();
+
+				UGameplayStatics::ProjectWorldToScreen(
+					GetWorld()->GetFirstPlayerController(),
+					UseTarget->GetActorLocation() + FVector(0.f, 0.f, 1.5f),
+					TextLocation);
+
+				UsePrompt = Cast<UUsePromptUI>(CreateWidget(
+					GetGameInstance(),
+					UsePromptClass));
+				UsePrompt->SetPositionInViewport(TextLocation);
+				UsePrompt->PromptText->SetText(FText::FromString("Press right-mouse to interact"));
+				UsePrompt->AddToViewport();
 				
 				if (GEngine) {
 					GEngine->AddOnScreenDebugMessage(
@@ -265,12 +286,22 @@ void ABeatEmUpCharacter::FindUseTarget()
 				
 			} else {
 				UE_LOG(LogTemp, Warning, TEXT("Actor not interactable!"));
+				
+				// if (UsePrompt) {
+				// 	UsePrompt->RemoveFromParent();
+				// 	UsePrompt = nullptr;
+				// }
 			}
 		} else {
 			UE_LOG(LogTemp, Warning, TEXT("What happened!?"));
 		}
 	} else {
 		UE_LOG(LogTemp, Warning, TEXT("Didn't hit an actor!"));
+		
+		// if (UsePrompt) {
+		// 	UsePrompt->RemoveFromParent();
+		// 	UsePrompt = nullptr;
+		// }
 	}
 }
 
