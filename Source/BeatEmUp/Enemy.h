@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BeatEmUpCharacter.h"
+#include "DamageTextUI.h"
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
 
@@ -32,6 +33,9 @@ public:
     float RagdollTime = 5;
 	
     FTimerHandle RagdollTimerHandle;
+
+	UPROPERTY(EditAnywhere)
+    TSubclassOf<UDamageTextUI> DamageTextClass;
 
 protected:
 	// Called when the game starts or when spawned
