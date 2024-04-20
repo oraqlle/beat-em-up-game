@@ -269,10 +269,16 @@ void ABeatEmUpCharacter::IsDashingSwitch()
 
 void ABeatEmUpCharacter::FindUseTarget()
 {
-	
 	if (UsePrompt) {
 		UsePrompt->RemoveFromParent();
 		UsePrompt = nullptr;
+		
+		TArray<UStaticMeshComponent*> Components;
+		UseTarget->GetComponents(Components);
+
+		for (auto i = 0; i < Components.Num(); ++i) {
+			Components[i]->SetRenderCustomDepth(false);
+		}
 	}
 	
 	FVector Start = GetActorLocation();
@@ -288,57 +294,43 @@ void ABeatEmUpCharacter::FindUseTarget()
 	TraceParams.bReturnPhysicalMaterial = false;
 	TraceParams.AddIgnoredActors(ActorsToIgnore);
 	TraceParams.TraceTag = FName("Use Find Trace Tag");
-	GetWorld()->DebugDrawTraceTag = TraceParams.TraceTag;
+	// GetWorld()->DebugDrawTraceTag = TraceParams.TraceTag;
 
 	if (bool bSweep = GetWorld()->LineTraceSingleByChannel(HitData, Start, End, ECC_Visibility, TraceParams)) {
 		if (HitData.GetActor()) {
 			UE_LOG(LogTemp, Warning, TEXT("We hit: %s"), *HitData.GetActor()->GetName());
 			
 			if (HitData.GetActor()->GetClass()->ImplementsInterface(UInteractable::StaticClass())) {
+
 				// Add highlight/text for interaction
-
 				UseTarget = HitData.GetActor();
+				
+				TArray<UStaticMeshComponent*> Components;
+				UseTarget->GetComponents(Components);
 
+				for (auto i = 0; i < Components.Num(); ++i) {
+					Components[i]->SetRenderCustomDepth(true);
+				}
+				
 				FVector2D TextLocation = FVector2D();
-
 				UGameplayStatics::ProjectWorldToScreen(
 					GetWorld()->GetFirstPlayerController(),
 					UseTarget->GetActorLocation() + FVector(0.f, 0.f, 1.5f),
 					TextLocation);
 
-				UsePrompt = Cast<UUsePromptUI>(CreateWidget(
-					GetGameInstance(),
-					UsePromptClass));
+				UsePrompt = Cast<UUsePromptUI>(CreateWidget(GetGameInstance(), UsePromptClass));
 				UsePrompt->SetPositionInViewport(TextLocation);
-				UsePrompt->PromptText->SetText(FText::FromString("Press right-mouse to interact"));
+				UsePrompt->PromptText->SetText(FText::FromString("Click right-mouse to interact"));
 				UsePrompt->AddToViewport();
-				
-				if (GEngine) {
-					GEngine->AddOnScreenDebugMessage(
-						4,
-						2.f,
-						FColor::Purple,
-						TEXT("Found interactable in sight and reach"));
-				}
 				
 			} else {
 				UE_LOG(LogTemp, Warning, TEXT("Actor not interactable!"));
-				
-				// if (UsePrompt) {
-				// 	UsePrompt->RemoveFromParent();
-				// 	UsePrompt = nullptr;
-				// }
 			}
 		} else {
 			UE_LOG(LogTemp, Warning, TEXT("What happened!?"));
 		}
 	} else {
 		UE_LOG(LogTemp, Warning, TEXT("Didn't hit an actor!"));
-		
-		// if (UsePrompt) {
-		// 	UsePrompt->RemoveFromParent();
-		// 	UsePrompt = nullptr;
-		// }
 	}
 }
 
