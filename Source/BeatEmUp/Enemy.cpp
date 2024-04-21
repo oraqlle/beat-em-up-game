@@ -69,13 +69,17 @@ void AEnemy::OnHit(
 	if (OtherActor == Player)
     {
 		if (Player->bDashing) {
-			FVector LaunchDirection = -GetActorForwardVector();
+			Ragdoll();
+			// FVector LaunchDirection = -GetActorForwardVector();
+			FVector LaunchDirection = GetActorLocation() - Player->GetActorLocation();
 			LaunchDirection.Normalize();
+			LaunchDirection *= 3;
 			LaunchDirection += FVector::UpVector;
 			// LaunchCharacter(LaunchDirection * Player->DashChargeScaler, false, false);
-			LaunchCharacter(LaunchDirection * 100000, false, false);
+			// GetMesh()->AddImpulse(LaunchDirection * 1e5);
+			GetMesh()->AddImpulse(LaunchDirection * 10 * Player->DashChargeScaler);
+			// LaunchCharacter(LaunchDirection * 100000, false, false);
 			DealDamage(Player->DashDamage);
-			// Ragdoll();
 		} else {
 			Player->DealDamage(DamageToPlayer);
 			Destroy();

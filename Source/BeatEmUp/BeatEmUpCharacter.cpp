@@ -240,7 +240,6 @@ void ABeatEmUpCharacter::ReleaseChargeDash()
 	LaunchCharacter(DashVel, false, false);
 
 	bDashReady = false;
-	DashChargeScaler = 0.f;
 	
 	GetWorld()->GetTimerManager().SetTimer(
 			DashCooldownTimerHandle,
@@ -265,6 +264,7 @@ void ABeatEmUpCharacter::ResetDash()
 void ABeatEmUpCharacter::IsDashingSwitch()
 {
 	bDashing = false;
+	DashChargeScaler = 0.f;
 }
 
 void ABeatEmUpCharacter::FindUseTarget()
