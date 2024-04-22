@@ -30,12 +30,6 @@ void AEnemy::BeginPlay()
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (Player)
-	{
-		const FVector TowardsPlayer = Player->GetActorLocation() - GetActorLocation();
-		AddMovementInput(TowardsPlayer);
-	}
-	
 }
 
 // Called to bind functionality to input
@@ -70,15 +64,11 @@ void AEnemy::OnHit(
     {
 		if (Player->bDashing) {
 			Ragdoll();
-			// FVector LaunchDirection = -GetActorForwardVector();
 			FVector LaunchDirection = GetActorLocation() - Player->GetActorLocation();
 			LaunchDirection.Normalize();
 			LaunchDirection *= 3;
 			LaunchDirection += FVector::UpVector;
-			// LaunchCharacter(LaunchDirection * Player->DashChargeScaler, false, false);
-			// GetMesh()->AddImpulse(LaunchDirection * 1e5);
 			GetMesh()->AddImpulse(LaunchDirection * 10 * Player->DashChargeScaler);
-			// LaunchCharacter(LaunchDirection * 100000, false, false);
 			DealDamage(Player->DashDamage);
 		} else {
 			Player->DealDamage(DamageToPlayer);
