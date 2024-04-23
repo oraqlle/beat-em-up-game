@@ -11,6 +11,7 @@ void AJumpPoint::BeginPlay()
 	Super::BeginPlay();
 
 	OnSmartLinkReached.AddDynamic(this, &AJumpPoint::LinkReached);
+	CopyEndPointsFromSimpleLinkToSmartLink();
 }
 
 void AJumpPoint::LinkReached(AActor* Agent, const FVector& Destination)
