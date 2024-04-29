@@ -116,7 +116,7 @@ public:
 
 	bool bDashResetting;
 
-	float DashChargeScaler = 0.f;
+	float DashChargeScalar = 0.f;
 	
 	FTimerHandle DashCooldownTimerHandle;
 	

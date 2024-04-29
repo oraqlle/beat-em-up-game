@@ -204,8 +204,8 @@ void ABeatEmUpCharacter::ChargeDash(const FInputActionInstance& Instance)
 
 	// Promote comparison to integer and multiply by scale which goes to zero
 	// if condition fails, avoiding cond-branch
-	DashChargeScaler = FMath::Clamp(
-		(DashChargeRate * Instance.GetElapsedTime() * (+(DashChargeScaler < DashChargeLimit))) + DashChargeScaler,
+	DashChargeScalar = FMath::Clamp(
+		(DashChargeRate * Instance.GetElapsedTime() * (+(DashChargeScalar < DashChargeLimit))) + DashChargeScalar,
 		0.f,
 		DashChargeLimit);
 
@@ -216,7 +216,7 @@ void ABeatEmUpCharacter::ChargeDash(const FInputActionInstance& Instance)
 			FColor::Yellow,
 			FString::Printf(
 				TEXT("Dash charging: [%.2f%%]"),
-				FMath::Clamp((DashChargeScaler / DashChargeLimit) * 100.f, 0.f, 100.f)));
+				FMath::Clamp((DashChargeScalar / DashChargeLimit) * 100.f, 0.f, 100.f)));
 	}
 }
 
@@ -231,12 +231,12 @@ void ABeatEmUpCharacter::ReleaseChargeDash()
 			2,
 			2.f,
 			FColor::Green,
-			FString::Printf(TEXT("Dashing force: %.3f"), DashChargeScaler));
+			FString::Printf(TEXT("Dashing force: %.3f"), DashChargeScalar));
 	}
 	
 	FVector DashVel = GetActorForwardVector();
 	DashVel.Normalize();
-	DashVel *= DashChargeScaler;
+	DashVel *= DashChargeScalar;
 	LaunchCharacter(DashVel, false, false);
 
 	bDashReady = false;
@@ -264,7 +264,7 @@ void ABeatEmUpCharacter::ResetDash()
 void ABeatEmUpCharacter::IsDashingSwitch()
 {
 	bDashing = false;
-	DashChargeScaler = 0.f;
+	DashChargeScalar = 0.f;
 }
 
 void ABeatEmUpCharacter::FindUseTarget()

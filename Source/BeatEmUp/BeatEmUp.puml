@@ -1,0 +1,137 @@
+﻿@startuml
+'https://plantuml.com/class-diagram
+
+'abstract class AbstractList
+'abstract AbstractCollection
+'interface List
+'interface Collection
+'
+'List <|-- AbstractList
+'Collection <|-- AbstractCollection
+'
+'Collection <|- List
+'AbstractCollection <|- AbstractList
+'AbstractList <|-- ArrayList
+'
+'class ArrayList {
+'Object[] elementData
+'size()
+'}
+'
+'enum TimeUnit {
+'DAYS
+'HOURS
+'MINUTES
+'}
+
+' Physical Entities
+class ABeatEmUpCharacter {
++MaxHealth : int
++CurrentHealth : int
++PunchAction : UInputAction*
++PunchDistance : float
++PunchForce : float
++PunchDamage : float
++PunchCooldown : float
++bPunchReady : bool
++UseAction : UInputAction*
++UseDistance : float
+..
++UsePromptClass : TSubClassOf<UUsePromptUI>
++UsePrompt : UUsePromptUI*
++UseTarget : AActor*
++InGameUI : UInGameUI*
++DashAction : UInputAction*
++DashChargeLimit : float
++DashCooldown : float
++DashChargeRate : float
++DashDamage : float
++bDashReady : bool
++bDashReady : bool
++bDashing : bool
++bDashResetting : bool
++DashChargeScalar : float
++DashCooldownTimerHandle : FTimerHandle
++DashTimerHandle : FTimerHandle
+==
+#virtual BeginPlay()
++virtual Tick(float)
+..
++Punch()
++ResetPunch
++DealDamage(float)
++Use()
++ChargeDash(const FInputActionInstance&)
++ReleaseChargeDash()
++ResetDash()
++IsDashingSwitch()
++FindUseTarget()
+}
+
+class AEnemy {
++Player : ABeatEmUpCharacter*
++MaxHealth : float
++CurrentHealth : float
++DamageToPlayer : float
++RagdollTime : float
++RagdollTimerHandle : FTimerHandle
++DamageClassText : TSubClassOf<UDamageTextUI>
+==
+#virtual BeginPlay()
++virtual Tick(float)
+..
++DealDamage(float)
++OnHit(UPrimitiveComponent*, AActor*, UPrimitiveComponent*, FVector, const FHitResult&)
++Ragdoll()
++StopRagdoll()
+}
+
+ABeatEmUpCharacter o-- AEnemy
+
+class ABouncePad {
++ReboundForce : float
+==
++OnHit(UPrimitiveComponent*, AActor*, UPrimitiveComponent*, FVector, const FHitResult&)
+}
+
+ABeatEmUpCharacter <-- ABouncePad
+ 
+' UI Classes
+class UDamageTextUI {
++DamageText : UTextBlock*
++TargetLocation : FVector2D
++CurrentLocation : FVector2D
+==
++virtual NativeTick(const FGeometry&, float)
++virtual NativeConstruct()
+}
+
+UDamageTextUI o-- AEnemy
+
+class UInGameUI {
++HealthBar : UProgressBar*
++CurrentHealthText : UTextBlock*
++MaxHealthText : UTextBlock*
+PunchCooldown : UProgressBar*
+==
++ Player() : ABeatEmUpCharacter*
+}
+
+UInGameUI o-- ABeatEmUpCharacter
+
+class UUsePromptUI {
++PromptText : UTextBlock*
+}
+
+UUsePromptUI o-- ABeatEmUpCharacter
+
+' Interfaces
+class UInteractable
+interface IInteractable {
++Interact()
+}
+
+UInteractable <|-- IInteractable 
+IInteractable <-- ABeatEmUpCharacter
+
+@enduml

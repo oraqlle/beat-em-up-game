@@ -68,7 +68,7 @@ void AEnemy::OnHit(
 			LaunchDirection.Normalize();
 			LaunchDirection *= 3;
 			LaunchDirection += FVector::UpVector;
-			GetMesh()->AddImpulse(LaunchDirection * 10 * Player->DashChargeScaler);
+			GetMesh()->AddImpulse(LaunchDirection * 10 * Player->DashChargeScalar);
 			DealDamage(Player->DashDamage);
 		} else {
 			Player->DealDamage(DamageToPlayer);
