@@ -22,7 +22,7 @@ void AJumpPoint::LinkReached(AActor* Agent, const FVector& Destination)
 		UGameplayStatics::SuggestProjectileVelocity_CustomArc(
 			GetWorld(),
 			LaunchVelocity,
-			GetActorLocation(),
+			Agent->GetActorLocation(),
 			Destination);
 		
 		Enemy->LaunchCharacter(LaunchVelocity * 1.1, true, true);
