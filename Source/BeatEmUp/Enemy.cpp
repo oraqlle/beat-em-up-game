@@ -3,6 +3,8 @@
 
 #include "Enemy.h"
 
+#include "BrainComponent.h"
+#include "EnemyBTController.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -79,6 +81,7 @@ void AEnemy::OnHit(
 
 void AEnemy::Ragdoll()
 {
+	Cast<AEnemyBTController>(GetController())->BrainComponent->PauseLogic("Ragdolling!");
 	GetMesh()->SetCollisionProfileName("Ragdoll");
     GetMesh()->SetSimulatePhysics(true);
     GetCapsuleComponent()->SetCollisionProfileName("NoCollision");
@@ -104,5 +107,7 @@ void AEnemy::StopRagdoll()
     GetMesh()->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::SnapToTargetIncludingScale);
     GetMesh()->SetRelativeLocationAndRotation(FVector(0,0,-90), FRotator(0,-90,0));
     GetCapsuleComponent()->SetCollisionProfileName("Pawn");
+	
+	Cast<AEnemyBTController>(GetController())->BrainComponent->ResumeLogic("Moving Again!");
 }
 

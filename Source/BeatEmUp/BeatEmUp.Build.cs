@@ -17,7 +17,8 @@ public class BeatEmUp : ModuleRules
 			"EnhancedInput" ,
 			"UMG",
 			"NavigationSystem",
-			"AIModule"
+			"AIModule",
+			"GameplayTasks"
 		});
 	}
 }
