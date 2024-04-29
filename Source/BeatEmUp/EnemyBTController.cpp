@@ -3,6 +3,8 @@
 
 #include "EnemyBTController.h"
 
+#include "Enemy.h"
+
 AEnemyBTController::AEnemyBTController()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -32,6 +34,7 @@ void AEnemyBTController::BeginPlay()
     RunBehaviorTree(BehaviourTree);
     
     GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemyBTController::OnSensesUpdated);
+	BlackboardComponent->SetValueAsBool("HasAmmo", true);
 }
 
 void AEnemyBTController::Tick(float DeltaSeconds)
@@ -85,4 +88,12 @@ void AEnemyBTController::OnSensesUpdated(AActor* UpdatedActor, FAIStimulus Stimu
 			}
 		}
     }
+}
+
+void AEnemyBTController::Shoot()
+{
+	FVector ShootDirection = TargetPlayer->GetActorLocation() - GetPawn()->GetActorLocation();
+    Cast<AEnemy>(GetPawn())->Shoot(ShootDirection);
+    Ammo--;
+    BlackboardComponent->SetValueAsBool("HasAmmo", Ammo > 0);
 }

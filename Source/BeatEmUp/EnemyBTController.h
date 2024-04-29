@@ -52,6 +52,9 @@ public:
 	
     UPROPERTY()
     APawn* TargetPlayer;
+
+	UPROPERTY(EditAnywhere)
+    float Ammo = 5;
 	
 public:
 
@@ -67,4 +70,6 @@ public:
 
 	UFUNCTION()
 	void OnSensesUpdated(AActor* UpdatedActor, FAIStimulus Stimulus);
+	
+    void Shoot();
 };

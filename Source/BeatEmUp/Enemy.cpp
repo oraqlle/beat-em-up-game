@@ -111,3 +111,12 @@ void AEnemy::StopRagdoll()
 	Cast<AEnemyBTController>(GetController())->BrainComponent->ResumeLogic("Moving Again!");
 }
 
+void AEnemy::Shoot(FVector Direction)
+{
+	FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100;
+    FRotator SpawnRotation = Direction.Rotation();
+    ABullet* SpawnedBullet = Cast<ABullet>(GetWorld()->SpawnActor(BulletClass, &SpawnLocation, &SpawnRotation));
+    Direction.Normalize();
+    SpawnedBullet->MovementComponent->Velocity = Direction * SpawnedBullet->MovementSpeed;
+}
+
