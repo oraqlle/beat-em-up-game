@@ -233,6 +233,8 @@ void ABeatEmUpCharacter::ReleaseChargeDash()
 			FColor::Green,
 			FString::Printf(TEXT("Dashing force: %.3f"), DashChargeScalar));
 	}
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Overlap);
 	
 	FVector DashVel = GetActorForwardVector();
 	DashVel.Normalize();
@@ -264,6 +266,7 @@ void ABeatEmUpCharacter::ResetDash()
 void ABeatEmUpCharacter::IsDashingSwitch()
 {
 	bDashing = false;
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Block);
 	DashChargeScalar = 0.f;
 }
 

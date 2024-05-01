@@ -26,6 +26,7 @@ void AEnemy::BeginPlay()
 	Player = Cast<ABeatEmUpCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	GetCharacterMovement()->bOrientRotationToMovement = true;
     GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AEnemy::OnHit);
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnOverlapBegin);
 }
 
 // Called every frame
@@ -64,19 +65,26 @@ void AEnemy::OnHit(
 {
 	if (OtherActor == Player)
     {
-		if (Player->bDashing) {
-			Ragdoll();
-			FVector LaunchDirection = GetActorLocation() - Player->GetActorLocation();
-			LaunchDirection.Normalize();
-			LaunchDirection *= 3;
-			LaunchDirection += FVector::UpVector;
-			GetMesh()->AddImpulse(LaunchDirection * 10 * Player->DashChargeScalar);
-			DealDamage(Player->DashDamage);
-		} else {
-			Player->DealDamage(DamageToPlayer);
-			Destroy();
-		}
+		Player->DealDamage(DamageToPlayer);
+		Destroy();
     }
+}
+
+void AEnemy::OnOverlapBegin(
+	UPrimitiveComponent* OverlapComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult)
+{
+	Ragdoll();
+	FVector LaunchDirection = GetActorLocation() - Player->GetActorLocation();
+	LaunchDirection.Normalize();
+	LaunchDirection *= 3;
+	LaunchDirection += FVector::UpVector;
+	GetMesh()->AddImpulse(LaunchDirection * 10 * Player->DashChargeScalar);
+	DealDamage(Player->DashDamage);
 }
 
 void AEnemy::Ragdoll()
