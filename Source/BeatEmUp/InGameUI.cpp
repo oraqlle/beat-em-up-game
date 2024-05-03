@@ -6,11 +6,12 @@
 
 void UInGameUI::UpdateValues()
 {
-	HealthBar->SetPercent(static_cast<float>(Player->CurrentHealth)/Player->MaxHealth);
+	HealthBar->SetPercent(static_cast<float>(Player->CurrentHealth) / Player->MaxHealth);
     CurrentHealthText->SetText(FText::FromString(FString::FromInt(Player->CurrentHealth)));
+	
     float PunchTimePercentage = 0;
 	
-    if(GetWorld()->GetTimerManager().TimerExists(Player->PunchCooldownTimerHandle))
+    if (GetWorld()->GetTimerManager().TimerExists(Player->PunchCooldownTimerHandle))
     {
 		PunchTimePercentage = GetWorld()
     		->GetTimerManager()
@@ -18,4 +19,7 @@ void UInGameUI::UpdateValues()
     }
 	
     PunchCooldown->SetPercent(1 - PunchTimePercentage);
+
+	const float DashChargePercentage = Player->DashChargeScalar / Player->DashChargeLimit;
+	DashChargeBar->SetPercent(DashChargePercentage);
 }

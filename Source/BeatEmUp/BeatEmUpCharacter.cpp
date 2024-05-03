@@ -209,15 +209,7 @@ void ABeatEmUpCharacter::ChargeDash(const FInputActionInstance& Instance)
 		0.f,
 		DashChargeLimit);
 
-	if (GEngine) {
-		GEngine->AddOnScreenDebugMessage(
-			1,
-			2.0f,
-			FColor::Yellow,
-			FString::Printf(
-				TEXT("Dash charging: [%.2f%%]"),
-				FMath::Clamp((DashChargeScalar / DashChargeLimit) * 100.f, 0.f, 100.f)));
-	}
+	InGameUI->UpdateValues();
 }
 
 void ABeatEmUpCharacter::ReleaseChargeDash()
@@ -239,7 +231,8 @@ void ABeatEmUpCharacter::ReleaseChargeDash()
 	FVector DashVel = GetActorForwardVector();
 	DashVel.Normalize();
 	DashVel *= DashChargeScalar;
-	LaunchCharacter(DashVel, false, false);
+	Cast<UCharacterMovementComponent>(GetMovementComponent())->AddForce(DashVel * 10000);
+	// LaunchCharacter(DashVel, false, false);
 
 	bDashReady = false;
 	
@@ -268,6 +261,7 @@ void ABeatEmUpCharacter::IsDashingSwitch()
 	bDashing = false;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Block);
 	DashChargeScalar = 0.f;
+	InGameUI->UpdateValues();
 }
 
 void ABeatEmUpCharacter::FindUseTarget()

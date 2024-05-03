@@ -33,6 +33,12 @@ public:
 
 	UPROPERTY()
     ABeatEmUpCharacter* Player;
+
+	UPROPERTY(meta = (BindWidget))
+	UProgressBar* DashChargeBar;
+	
+	UPROPERTY(meta = (BindWidget))
+	UProgressBar* DashRechargeBar;
 	
     void UpdateValues();
 };
