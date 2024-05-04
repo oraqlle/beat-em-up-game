@@ -96,32 +96,44 @@ public:
     UInGameUI* InGameUI;
 	
 	UPROPERTY(EditAnywhere, Category = Input)
-	UInputAction* DashAction;
+	UInputAction* ThrusterChargeAction;
 
 	UPROPERTY(EditAnywhere)
-	float DashChargeLimit = 4000.f;
-	
-	UPROPERTY(EditAnywhere)
-	float DashCooldown = 5.f;
+	uint32 ThrusterForceScalar = 50000;
 
 	UPROPERTY(EditAnywhere)
-	float DashChargeRate = 350.f;
+	int ThrusterFuelLimit = 4000;
+	
+	UPROPERTY(EditAnywhere)
+	float FuelConsumptionRate = 10.f;
 
 	UPROPERTY(EditAnywhere)
-	float DashDamage = 30.f;
+	float RefuelRate = 6.5f;
 
-	bool bDashReady = true;
+	UPROPERTY(EditAnywhere)
+	float ThrusterChargeDamage = 30.f;
 
-	bool bDashing = false;
+	UPROPERTY(EditAnywhere)
+	uint32 ThrusterKnockBackScalar = 1000000;
 
-	bool bDashResetting;
-
-	float DashChargeScalar = 0.f;
+	UPROPERTY(EditAnywhere)
+	float ThrusterFuelDepletedPauseTime = 7.f;
 	
-	FTimerHandle DashCooldownTimerHandle;
+	UPROPERTY(EditAnywhere)
+	float ThrusterFuelRefillPauseTime = 0.8f;
 	
-	FTimerHandle DashTimerHandle;
+	float ThrusterFuel = ThrusterFuelLimit;
+
+	bool bThrustersReady = true;
+
+	bool bThrustersEngaged = false;
+
+	bool bThrusterFuelDepleted = false;
+
+	bool bThrustersRefuelling = false;
 	
+	FTimerHandle ThrusterRefuelTimerHandle;
+
 protected:
 
 	/** Called for movement input */
@@ -158,13 +170,13 @@ public:
     void Use();
 
 	UFUNCTION()
-	void ChargeDash(const FInputActionInstance& Instance);
+	void UseThrusters(const FInputActionInstance& Instance);
 
 	UFUNCTION()
-	void ReleaseChargeDash();	
+	void DisengageThrusters();	
 
 	UFUNCTION()
-	void ResetDash();
+	void PauseThrusterRefuel();
 
 	UFUNCTION()
 	void IsDashingSwitch();

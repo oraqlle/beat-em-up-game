@@ -83,8 +83,8 @@ void AEnemy::OnOverlapBegin(
 	LaunchDirection.Normalize();
 	LaunchDirection *= 3;
 	LaunchDirection += FVector::UpVector;
-	GetMesh()->AddImpulse(LaunchDirection * 10 * Player->DashChargeScalar);
-	DealDamage(Player->DashDamage);
+	GetMesh()->AddImpulse(LaunchDirection * Player->ThrusterKnockBackScalar);
+	DealDamage(Player->ThrusterChargeDamage);
 }
 
 void AEnemy::Ragdoll()

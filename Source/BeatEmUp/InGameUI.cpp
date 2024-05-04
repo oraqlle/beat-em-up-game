@@ -20,6 +20,5 @@ void UInGameUI::UpdateValues()
 	
     PunchCooldown->SetPercent(1 - PunchTimePercentage);
 
-	const float DashChargePercentage = Player->DashChargeScalar / Player->DashChargeLimit;
-	DashChargeBar->SetPercent(DashChargePercentage);
+	ThrusterFuelBar->SetPercent(Player->ThrusterFuel / Player->ThrusterFuelLimit);
 }

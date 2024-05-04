@@ -89,6 +89,11 @@ void ABeatEmUpCharacter::Tick(float DeltaSeconds)
 		InGameUI->UpdateValues();
     }
 
+	if (bThrustersRefuelling) {
+		ThrusterFuel += RefuelRate * DeltaSeconds;
+		InGameUI->UpdateValues();
+	}
+
 #if !__FIT2096_BUILD_OPT__LAB_BASED_USE
 	FindUseTarget();
 #endif
@@ -198,70 +203,73 @@ void ABeatEmUpCharacter::Use()
 #endif
 }
 
-void ABeatEmUpCharacter::ChargeDash(const FInputActionInstance& Instance)
+void ABeatEmUpCharacter::UseThrusters(const FInputActionInstance& Instance)
 {	
-	if (!bDashReady) { return; }
+	if (!bThrustersReady) { return; }
 
-	// Promote comparison to integer and multiply by scale which goes to zero
-	// if condition fails, avoiding cond-branch
-	DashChargeScalar = FMath::Clamp(
-		(DashChargeRate * Instance.GetElapsedTime() * (+(DashChargeScalar < DashChargeLimit))) + DashChargeScalar,
-		0.f,
-		DashChargeLimit);
+	// Clear short refuel pause timer if reengaging thrusters but only if fuel is not fully depleted.
+	if (GetWorld()->GetTimerManager().TimerExists(ThrusterRefuelTimerHandle) && !bThrusterFuelDepleted) {
+		ThrusterRefuelTimerHandle.Invalidate();
+	}
+	
+	bThrustersEngaged = true;
 
+	float const ConsumedFuel = FuelConsumptionRate * Instance.GetElapsedTime();
+	ThrusterFuel -= FMath::Clamp(ConsumedFuel, 0.f, ThrusterFuelLimit);
+	
+	FVector ThrusterForce = GetActorForwardVector();
+	ThrusterForce.Normalize();
+	ThrusterForce *= ThrusterForceScalar * ConsumedFuel;
+	
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Overlap);
+	Cast<UCharacterMovementComponent>(GetMovementComponent())->AddForce(ThrusterForce);
+	
+	if (ThrusterFuel <= 0.f) {
+
+		bThrustersReady = false;
+		bThrusterFuelDepleted = true;
+		
+		GetWorld()->GetTimerManager().SetTimer(
+			ThrusterRefuelTimerHandle,
+			this,
+			&ABeatEmUpCharacter::PauseThrusterRefuel,
+			ThrusterFuelDepletedPauseTime,
+			false);
+	}
+	
+	// // Promote comparison to integer and multiply by scale which goes to zero
+	// // if condition fails, avoiding cond-branch
+	// DashChargeScalar = FMath::Clamp(
+	// 	(DashChargeRate * Instance.GetElapsedTime() * (+(DashChargeScalar < DashChargeLimit))) + DashChargeScalar,
+	// 	0.f,
+	// 	DashChargeLimit);
+	
 	InGameUI->UpdateValues();
 }
 
-void ABeatEmUpCharacter::ReleaseChargeDash()
+void ABeatEmUpCharacter::DisengageThrusters()
 {
-	if (!bDashReady) { return; }
-
-	bDashing = true;
-
-	if (GEngine) {
-		GEngine->AddOnScreenDebugMessage(
-			2,
-			2.f,
-			FColor::Green,
-			FString::Printf(TEXT("Dashing force: %.3f"), DashChargeScalar));
-	}
-
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Overlap);
+	bThrustersEngaged = false;
 	
-	FVector DashVel = GetActorForwardVector();
-	DashVel.Normalize();
-	DashVel *= DashChargeScalar;
-	Cast<UCharacterMovementComponent>(GetMovementComponent())->AddForce(DashVel * 10000);
-	// LaunchCharacter(DashVel, false, false);
-
-	bDashReady = false;
-	
+	// Short pause to start refilling if not fully depleted	
 	GetWorld()->GetTimerManager().SetTimer(
-			DashCooldownTimerHandle,
+			ThrusterRefuelTimerHandle,
 			this,
-			&ABeatEmUpCharacter::ResetDash,
-			DashCooldown,
-			false);
-	
-	GetWorld()->GetTimerManager().SetTimer(
-			DashTimerHandle,
-			this,
-			&ABeatEmUpCharacter::IsDashingSwitch,
-			GetActorLocation().Size() / DashVel.Size(),  // Find time dashing for
+			&ABeatEmUpCharacter::PauseThrusterRefuel,
+			ThrusterFuelRefillPauseTime,
 			false);
 }
 
-void ABeatEmUpCharacter::ResetDash()
-{
-	bDashReady = true;
+void ABeatEmUpCharacter::PauseThrusterRefuel() {
+	bThrustersRefuelling = true;
 }
 
 void ABeatEmUpCharacter::IsDashingSwitch()
 {
-	bDashing = false;
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Block);
-	DashChargeScalar = 0.f;
-	InGameUI->UpdateValues();
+	// bDashing = false;
+	// GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Block);
+	// DashChargeScalar = 0.f;
+	// InGameUI->UpdateValues();
 }
 
 void ABeatEmUpCharacter::FindUseTarget()
@@ -357,11 +365,9 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Dash Attack		
 		// Binding for ongoing to increment hold duration
-		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &ABeatEmUpCharacter::ChargeDash);
+		EnhancedInputComponent->BindAction(ThrusterChargeAction, ETriggerEvent::Triggered, this, &ABeatEmUpCharacter::UseThrusters);
 		// Binding for when dash gets released
-		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Completed, this, &ABeatEmUpCharacter::ReleaseChargeDash);
-		// Binding for if key is not pressed for long enough to trigger
-		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Canceled, this, &ABeatEmUpCharacter::ResetDash);
+		EnhancedInputComponent->BindAction(ThrusterChargeAction, ETriggerEvent::Completed, this, &ABeatEmUpCharacter::DisengageThrusters);
 	}
 	else
 	{

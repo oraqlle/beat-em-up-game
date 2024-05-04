@@ -35,10 +35,7 @@ public:
     ABeatEmUpCharacter* Player;
 
 	UPROPERTY(meta = (BindWidget))
-	UProgressBar* DashChargeBar;
-	
-	UPROPERTY(meta = (BindWidget))
-	UProgressBar* DashRechargeBar;
+	UProgressBar* ThrusterFuelBar;
 	
     void UpdateValues();
 };
