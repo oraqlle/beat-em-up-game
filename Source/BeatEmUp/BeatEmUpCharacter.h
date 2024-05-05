@@ -99,28 +99,28 @@ public:
 	UInputAction* ThrusterChargeAction;
 
 	UPROPERTY(EditAnywhere)
-	uint32 ThrusterForceScalar = 50000;
+	uint32 ThrusterForceScalar = 350000;
 
 	UPROPERTY(EditAnywhere)
-	int ThrusterFuelLimit = 4000;
+	int ThrusterFuelLimit = 5000;
 	
 	UPROPERTY(EditAnywhere)
-	float FuelConsumptionRate = 10.f;
+	float FuelConsumptionRate = 30.f;
 
 	UPROPERTY(EditAnywhere)
-	float RefuelRate = 6.5f;
+	float RefuelRate = 1000.f;
 
 	UPROPERTY(EditAnywhere)
 	float ThrusterChargeDamage = 30.f;
 
 	UPROPERTY(EditAnywhere)
-	uint32 ThrusterKnockBackScalar = 1000000;
+	uint32 ThrusterKnockBackScalar = 100000;
 
 	UPROPERTY(EditAnywhere)
-	float ThrusterFuelDepletedPauseTime = 7.f;
+	float ThrusterFuelDepletedPauseTime = 8.f;
 	
 	UPROPERTY(EditAnywhere)
-	float ThrusterFuelRefillPauseTime = 0.8f;
+	float ThrusterFuelRefillPauseTime = 1.5f;
 	
 	float ThrusterFuel = ThrusterFuelLimit;
 
@@ -176,7 +176,7 @@ public:
 	void DisengageThrusters();	
 
 	UFUNCTION()
-	void PauseThrusterRefuel();
+	void UnpauseThrusterRefuel();
 
 	UFUNCTION()
 	void IsDashingSwitch();
