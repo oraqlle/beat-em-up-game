@@ -105,6 +105,7 @@ void AEnemy::StopRagdoll()
 {
 	if (CurrentHealth <= 0)
     {
+		Player->AddEXP(EXPAmount);
 		Destroy();
 		return;
     }

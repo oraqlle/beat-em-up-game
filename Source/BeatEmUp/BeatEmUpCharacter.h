@@ -134,6 +134,15 @@ public:
 	
 	FTimerHandle ThrusterRefuelTimerHandle;
 
+	UPROPERTY(EditAnywhere)
+    int CurrentEXP = 0;
+	
+    UPROPERTY(EditAnywhere)
+    int EXPToLevel = 50;
+	
+    UPROPERTY(EditAnywhere)
+    float IncreaseMultiplier = 1.5;
+
 protected:
 
 	/** Called for movement input */
@@ -141,7 +150,6 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-			
 
 protected:
 	// APawn interface
@@ -179,5 +187,7 @@ public:
 	void UnpauseThrusterRefuel();
 
 	void FindUseTarget();
+
+	void AddEXP(int EXPToAdd);
 };
 

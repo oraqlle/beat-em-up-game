@@ -21,4 +21,7 @@ void UInGameUI::UpdateValues()
     PunchCooldown->SetPercent(1 - PunchTimePercentage);
 
 	ThrusterFuelBar->SetPercent(Player->ThrusterFuel / Player->ThrusterFuelLimit);
+
+	MaxHealthText->SetText(FText::FromString(FString::SanitizeFloat(Player->MaxHealth)));
+	EXPBar->SetPercent(static_cast<float>(Player->CurrentEXP) / Player->EXPToLevel);
 }

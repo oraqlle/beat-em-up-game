@@ -348,6 +348,22 @@ void ABeatEmUpCharacter::FindUseTarget()
 	}
 }
 
+void ABeatEmUpCharacter::AddEXP(int EXPToAdd)
+{
+	CurrentEXP += EXPToAdd;
+	
+    while (CurrentEXP > EXPToLevel)
+    {
+		CurrentEXP -= EXPToLevel;
+		EXPToLevel *= IncreaseMultiplier;
+		PunchDamage *= IncreaseMultiplier;
+		MaxHealth *= IncreaseMultiplier;
+		CurrentHealth = MaxHealth;
+    }
+	
+    InGameUI->UpdateValues();
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 

@@ -37,5 +37,8 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* ThrusterFuelBar;
 	
+	UPROPERTY(meta = (BindWidget))
+    UProgressBar* EXPBar;
+	
     void UpdateValues();
 };
