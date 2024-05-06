@@ -35,6 +35,7 @@ void AEnemyBTController::BeginPlay()
     
     GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemyBTController::OnSensesUpdated);
 	BlackboardComponent->SetValueAsBool("HasAmmo", true);
+	// BlackboardComponent->SetValueAsBool("RunAway", true);
 }
 
 void AEnemyBTController::Tick(float DeltaSeconds)
@@ -44,6 +45,9 @@ void AEnemyBTController::Tick(float DeltaSeconds)
 	if (TargetPlayer)
     {
 		BlackboardComponent->SetValueAsVector("PlayerPosition", TargetPlayer->GetActorLocation());
+
+		const ABeatEmUpCharacter* Player = Cast<ABeatEmUpCharacter>(TargetPlayer);
+		BlackboardComponent->SetValueAsBool("RunAway", Player->bThrustersEngaged);
     }
 }
 
@@ -62,29 +66,38 @@ void AEnemyBTController::GenerateNewRandomLocation()
 	if (NavigationSystem)
     {
 		FNavLocation ReturnLocation;
-		NavigationSystem->GetRandomReachablePointInRadius(GetPawn()->GetActorLocation(), PatrolDistance, ReturnLocation);
+		
+		NavigationSystem->GetRandomReachablePointInRadius(
+			GetPawn()->GetActorLocation(),
+			PatrolDistance,
+			ReturnLocation);
+
+		
 		BlackboardComponent->SetValueAsVector("PatrolPoint", ReturnLocation.Location);
     }
 }
 
 void AEnemyBTController::OnSensesUpdated(AActor* UpdatedActor, FAIStimulus Stimulus)
 {
-	APawn* SensedPawn = Cast<APawn>(UpdatedActor);
-	
-    if (SensedPawn)
+	if (APawn* SensedPawn = Cast<APawn>(UpdatedActor))
     {
 		if (SensedPawn->IsPlayerControlled())
 		{
-			if(Stimulus.WasSuccessfullySensed())
+			if (Stimulus.WasSuccessfullySensed())
 			{
 				TargetPlayer = SensedPawn;
-				BlackboardComponent->SetValueAsBool("ChasePlayer", true);
+				const ABeatEmUpCharacter* Player = Cast<ABeatEmUpCharacter>(TargetPlayer);
+			
+				BlackboardComponent->SetValueAsBool("RunAway", Player->bThrustersEngaged);
+				BlackboardComponent->SetValueAsBool("ChasePlayer", !Player->bThrustersEngaged);
+				// BlackboardComponent->SetValueAsBool("ChasePlayer", true);
 				BlackboardComponent->SetValueAsVector(
 					"PlayerPosition",
 					TargetPlayer->GetActorLocation());
 			} else {
 				TargetPlayer = nullptr;
 				BlackboardComponent->SetValueAsBool("ChasePlayer", false);
+				BlackboardComponent->SetValueAsBool("RunAway", false);
 			}
 		}
     }
@@ -92,8 +105,52 @@ void AEnemyBTController::OnSensesUpdated(AActor* UpdatedActor, FAIStimulus Stimu
 
 void AEnemyBTController::Shoot()
 {
-	FVector ShootDirection = TargetPlayer->GetActorLocation() - GetPawn()->GetActorLocation();
+	const FVector ShootDirection = TargetPlayer->GetActorLocation() - GetPawn()->GetActorLocation();
     Cast<AEnemy>(GetPawn())->Shoot(ShootDirection);
     Ammo--;
     BlackboardComponent->SetValueAsBool("HasAmmo", Ammo > 0);
+}
+
+void AEnemyBTController::GenerateRunAwayLocation()
+{
+	if (NavigationSystem && TargetPlayer != nullptr) {
+		FNavLocation NavLocation;
+
+		const FVector PlayerLocation = TargetPlayer->GetActorLocation();
+		const FVector EnemyLocation = GetPawn()->GetActorLocation();
+		FVector PlayerEnemyVector = EnemyLocation - PlayerLocation;
+		PlayerEnemyVector.Normalize();
+		const float PlayerEnemyDist = PlayerEnemyVector.Size();
+		FVector Origin =  PlayerEnemyVector * -PlayerEnemyDist;
+		const float FleeDist = Origin.Size();
+		
+		NavigationSystem->GetRandomReachablePointInRadius(
+			Origin,
+			FleeDist,
+			NavLocation);
+
+		const FVector FleeLocation = NavLocation.Location;
+		GetBlackboardComponent()->SetValueAsVector("RunAwayLocation", FleeLocation);
+
+		// while (!(EnemyFleeDistance < PlayerFleeDistance)) {
+		// 	const FVector PlayerLocation = TargetPlayer->GetActorLocation();
+		// 	const FVector EnemyLocation = GetPawn()->GetActorLocation();
+		// 	FVector PlayerEnemyVector = EnemyLocation - PlayerLocation;
+		// 	PlayerEnemyVector.Normalize();
+		// 	PlayerEnemyVector *= -20;
+		// 	
+		// 	NavigationSystem->GetRandomReachablePointInRadius(
+		// 		PlayerEnemyVector,
+		// 		PatrolDistance,
+		// 		NavLocation);
+		//
+		// 	FleeLocation = NavLocation.Location;
+		// 	PlayerFleeDistance = FVector::Distance(PlayerLocation, FleeLocation);
+		// 	EnemyFleeDistance = FVector::Distance(EnemyLocation, FleeLocation);
+		// }
+		//
+		// if (EnemyFleeDistance < PlayerFleeDistance) {
+		// 	GetBlackboardComponent()->SetValueAsVector("RunAwayLocation", FleeLocation);	
+		// }
+	}
 }

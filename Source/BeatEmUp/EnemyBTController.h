@@ -72,4 +72,6 @@ public:
 	void OnSensesUpdated(AActor* UpdatedActor, FAIStimulus Stimulus);
 	
     void Shoot();
+
+	void GenerateRunAwayLocation();
 };

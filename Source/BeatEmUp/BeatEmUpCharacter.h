@@ -178,9 +178,6 @@ public:
 	UFUNCTION()
 	void UnpauseThrusterRefuel();
 
-	UFUNCTION()
-	void IsDashingSwitch();
-
 	void FindUseTarget();
 };
 

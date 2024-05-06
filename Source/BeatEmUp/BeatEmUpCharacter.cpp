@@ -84,6 +84,16 @@ void ABeatEmUpCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	// if (GEngine) {
+	// 	GEngine->AddOnScreenDebugMessage(
+	// 		1,
+	// 		2.0f,
+	// 		FColor::Yellow,
+	// 		FString::Printf(
+	// 			TEXT("bThrustersEngaged: %d"),
+	// 			(int)bThrustersEngaged));
+	// }
+
 	if (GetWorld()->GetTimerManager().TimerExists(PunchCooldownTimerHandle))
     {
 		InGameUI->UpdateValues();
