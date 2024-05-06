@@ -364,6 +364,21 @@ void ABeatEmUpCharacter::AddEXP(int EXPToAdd)
     InGameUI->UpdateValues();
 }
 
+
+void ABeatEmUpCharacter::PauseGame()
+{
+	if (!UGameplayStatics::IsGamePaused(GetWorld())) {
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		UPauseMenu* PauseMenu = Cast<UPauseMenu>(CreateWidget(GetGameInstance(),PauseMenuClass));
+		
+		if (PauseMenu) {
+			GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+			GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeUIOnly());
+			PauseMenu->AddToViewport();
+		}
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -393,6 +408,9 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(ThrusterChargeAction, ETriggerEvent::Triggered, this, &ABeatEmUpCharacter::UseThrusters);
 		// Thrusters Disengaged
 		EnhancedInputComponent->BindAction(ThrusterChargeAction, ETriggerEvent::Completed, this, &ABeatEmUpCharacter::DisengageThrusters);
+
+		// Pause Game
+		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::PauseGame);
 	}
 	else
 	{

@@ -118,6 +118,8 @@ void AEnemy::StopRagdoll()
     GetCapsuleComponent()->SetCollisionProfileName("Pawn");
 	
 	Cast<AEnemyBTController>(GetController())->BrainComponent->ResumeLogic("Moving Again!");
+	
+	GetCharacterMovement()->GravityScale = 1;
 }
 
 void AEnemy::Shoot(FVector Direction)

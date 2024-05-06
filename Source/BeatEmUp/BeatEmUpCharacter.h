@@ -6,6 +6,7 @@
 #include "InGameUI.h"
 #include "InputAction.h"
 #include "Interactable.h"
+#include "PauseMenu.h"
 #include "UsePromptUI.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
@@ -142,6 +143,12 @@ public:
 	
     UPROPERTY(EditAnywhere)
     float IncreaseMultiplier = 1.5;
+	
+	UPROPERTY(EditAnywhere)
+    UInputAction* PauseAction;
+	
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<UPauseMenu> PauseMenuClass;
 
 protected:
 
@@ -189,5 +196,8 @@ public:
 	void FindUseTarget();
 
 	void AddEXP(int EXPToAdd);
+
+	UFUNCTION()
+    void PauseGame();
 };
 
