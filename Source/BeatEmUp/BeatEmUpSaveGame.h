@@ -42,6 +42,27 @@ public:
 
 	UPROPERTY()
     float PlayerPunchDamage;
+	
+	UPROPERTY()
+	uint32 PlayerThrusterForceScalar;
+
+	UPROPERTY()
+	int PlayerThrusterFuelLimit;
+	
+	UPROPERTY()
+	float PlayerFuelConsumptionRate;
+
+	UPROPERTY()
+	float PlayerRefuelRate;
+
+	UPROPERTY()
+	float PlayerThrusterChargeDamage;
+
+	UPROPERTY()
+	uint32 PlayerThrusterKnockBackScalar;
+
+	UPROPERTY()
+	float PlayerThrusterFuel;
 
 	UPROPERTY()
 	TArray<FVector> EnemyLocations;

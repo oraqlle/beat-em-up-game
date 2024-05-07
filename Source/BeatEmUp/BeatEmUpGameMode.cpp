@@ -37,6 +37,16 @@ void ABeatEmUpGameMode::Load(UBeatEmUpSaveGame* LoadedGame)
     PlayerCharacter->MaxHealth = LoadedGame->PlayerMaxHealth;
     PlayerCharacter->CurrentEXP = LoadedGame->PlayerCurrentEXP;
     PlayerCharacter->EXPToLevel = LoadedGame->PlayerEXPToLevel;
+
+
+	PlayerCharacter->ThrusterForceScalar = LoadedGame->PlayerThrusterForceScalar;
+	PlayerCharacter->ThrusterFuelLimit = LoadedGame->PlayerThrusterFuelLimit;
+	PlayerCharacter->FuelConsumptionRate = LoadedGame->PlayerFuelConsumptionRate;
+	PlayerCharacter->RefuelRate = LoadedGame->PlayerRefuelRate;
+	PlayerCharacter->ThrusterChargeDamage = LoadedGame->PlayerThrusterChargeDamage;
+	PlayerCharacter->ThrusterKnockBackScalar = LoadedGame->PlayerThrusterKnockBackScalar;
+	PlayerCharacter->ThrusterFuel = LoadedGame->PlayerThrusterFuel;
+	
     PlayerCharacter->InGameUI->UpdateValues();
 	
     for (int i = 0; i < LoadedGame->EnemyLocations.Num(); i++)
@@ -71,6 +81,14 @@ void ABeatEmUpGameMode::Save(UBeatEmUpSaveGame* SaveGame)
     SaveGame->PlayerPunchDamage = PlayerCharacter->PunchDamage;
     SaveGame->PlayerCurrentEXP = PlayerCharacter->CurrentEXP;
     SaveGame->PlayerEXPToLevel = PlayerCharacter->EXPToLevel;
+
+	SaveGame->PlayerThrusterForceScalar = PlayerCharacter->ThrusterForceScalar;
+	SaveGame->PlayerThrusterFuelLimit = PlayerCharacter->ThrusterFuelLimit;
+	SaveGame->PlayerFuelConsumptionRate = PlayerCharacter->FuelConsumptionRate;
+	SaveGame->PlayerRefuelRate = PlayerCharacter->RefuelRate;
+	SaveGame->PlayerThrusterChargeDamage = PlayerCharacter->ThrusterChargeDamage;
+	SaveGame->PlayerThrusterKnockBackScalar = PlayerCharacter->ThrusterKnockBackScalar;
+	SaveGame->PlayerThrusterFuel = PlayerCharacter->ThrusterFuel;
 	
     TArray<AActor*> Enemies;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemy::StaticClass(), Enemies);
