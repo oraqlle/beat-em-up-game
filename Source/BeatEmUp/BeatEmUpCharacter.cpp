@@ -353,8 +353,7 @@ void ABeatEmUpCharacter::AddEXP(int EXPToAdd)
 	// TODO Modify thruster stats based on EXP
 	CurrentEXP += EXPToAdd;
 	
-    while (CurrentEXP > EXPToLevel)
-    {
+    while (CurrentEXP > EXPToLevel) {
 		CurrentEXP -= EXPToLevel;
 		EXPToLevel *= IncreaseMultiplier;
 		PunchDamage *= IncreaseMultiplier;
