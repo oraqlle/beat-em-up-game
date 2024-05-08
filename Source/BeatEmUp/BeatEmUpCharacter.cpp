@@ -350,6 +350,7 @@ void ABeatEmUpCharacter::FindUseTarget()
 
 void ABeatEmUpCharacter::AddEXP(int EXPToAdd)
 {
+	// TODO Modify thruster stats based on EXP
 	CurrentEXP += EXPToAdd;
 	
     while (CurrentEXP > EXPToLevel)
