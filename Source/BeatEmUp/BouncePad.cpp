@@ -4,6 +4,7 @@
 #include "BouncePad.h"
 
 #include "Components/BoxComponent.h"
+#include "GameFramework/Character.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 
 // Sets default values
@@ -29,16 +30,11 @@ void ABouncePad::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SpringReleaseTrigger->OnComponentBeginOverlap.AddDynamic(this, &ABouncePad::OnPadCollision);
+	SpringReleaseTrigger->OnComponentBeginOverlap.AddDynamic(this, &ABouncePad::OnPadOverlapBegin);
 
 	Pad->SetSimulatePhysics(true);
-	
-	const float ZScale = Base->GetComponentScale().Z;
-	const float BaseHeight = Base->GetStaticMesh()->GetBounds().GetBox().GetExtent().Z * ZScale;
-	const float PadZPos = Pad->GetComponentLocation().Component(2);
-	CompressedTargetZPosition = PadZPos - BaseHeight;
 
-	SpringReset();
+	// SpringReset();
 }
 
 // Called every frame
@@ -62,31 +58,36 @@ void ABouncePad::SpringReset()
 	// 			ZScale));
 	// }
 	
-	Spring->SetLinearPositionTarget(FVector(0.f, 0.f, CompressedTargetZPosition));
-	Pad->WakeRigidBody();
+	// Spring->SetLinearPositionTarget(FVector(0.f, 0.f, CompressedTargetZPosition));
+	// Pad->WakeRigidBody();
 }
 
-void ABouncePad::OnPadCollision(
+void ABouncePad::OnPadOverlapBegin(
 		UPrimitiveComponent* HitComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex,
 		bool bFromSweep,
 		const FHitResult & SweepResult)
-{	
-	Spring->SetLinearPositionTarget(FVector(0.f, 0.f, 0.f));
-	Pad->WakeRigidBody();
+{
 
-	FVector Velocity = OtherComp->GetComponentVelocity();
-	Velocity.Normalize();
-	Velocity.Z = -Velocity.Z;
-	OtherComp->AddForce(Velocity);
+	if (OtherComp == Pad) { return; }
 
-	GetWorld()->GetTimerManager().SetTimer(
-		SpringResetTimerHandle,
-		this,
-		&ABouncePad::SpringReset,
-		SpringResetTime,
-		false);
+	if (ACharacter* Character = Cast<ACharacter>(OtherActor); Character != nullptr) {
+		const FVector LaunchVelocity = Character->GetActorUpVector() * (BounceForce * 0.75f);
+		Character->LaunchCharacter(LaunchVelocity,true, true);
+	} else {
+		const FVector LaunchVelocity = OtherComp->GetUpVector() * BounceForce;
+		OtherComp->SetSimulatePhysics(true);
+		OtherComp->AddImpulse(LaunchVelocity);
+		OtherComp->SetSimulatePhysics(false);
+	}
+
+	// GetWorld()->GetTimerManager().SetTimer(
+	// 	SpringResetTimerHandle,
+	// 	this,
+	// 	&ABouncePad::SpringReset,
+	// 	SpringResetTime,
+	// 	false);
 }
 

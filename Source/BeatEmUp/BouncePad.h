@@ -30,7 +30,8 @@ public:
 	UPROPERTY(EditAnywhere)
     UBoxComponent* SpringReleaseTrigger;
 
-	float CompressedTargetZPosition;
+	UPROPERTY(EditAnywhere)
+	float BounceForce = 500;
 	
 	float SpringResetTime = 1.0;
 	
@@ -47,7 +48,7 @@ public:
 	void SpringReset();
 
 	UFUNCTION()
-	void OnPadCollision(
+	void OnPadOverlapBegin(
 		UPrimitiveComponent* HitComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
