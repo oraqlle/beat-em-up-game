@@ -45,8 +45,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void SpringReset();
-
 	UFUNCTION()
 	void OnPadOverlapBegin(
 		UPrimitiveComponent* HitComponent,

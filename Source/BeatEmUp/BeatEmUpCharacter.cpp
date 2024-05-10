@@ -16,6 +16,7 @@
 #include "Interactable.h"
 #include "Kismet/GameplayStatics.h"
 
+// Set to 1 to change functionality of interaction raycast to be based on labs
 #define __FIT2096_BUILD_OPT__LAB_BASED_USE 0
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -85,21 +86,13 @@ void ABeatEmUpCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// if (GEngine) {
-	// 	GEngine->AddOnScreenDebugMessage(
-	// 		1,
-	// 		2.0f,
-	// 		FColor::Yellow,
-	// 		FString::Printf(
-	// 			TEXT("bThrustersEngaged: %d"),
-	// 			(int)bThrustersEngaged));
-	// }
-
+	// Update UI during Punch cooldown
 	if (GetWorld()->GetTimerManager().TimerExists(PunchCooldownTimerHandle))
     {
 		InGameUI->UpdateValues();
     }
 
+	// Slowly refuel thruster fuel level, update UI accordingly
 	if (bThrustersRefuelling) {
 		ThrusterFuel = FMath::Clamp((RefuelRate * DeltaSeconds) + ThrusterFuel, 0.f, ThrusterFuelLimit);
 		InGameUI->UpdateValues();
@@ -107,6 +100,7 @@ void ABeatEmUpCharacter::Tick(float DeltaSeconds)
 		bThrustersReady = 0.f < ThrusterFuel;
 	}
 
+	// Finds interactable actor in Player's Line-Of-Sight (LOS)
 #if !__FIT2096_BUILD_OPT__LAB_BASED_USE
 	FindUseTarget();
 #endif
@@ -208,6 +202,7 @@ void ABeatEmUpCharacter::Use()
 		UE_LOG(LogTemp, Warning, TEXT("Didn't hit an actor!"));
     }
 #else
+	// Interact with Interactable currently in Player's LOS
 	if (UseTarget != nullptr) {
 		if (FVector::Distance(UseTarget->GetActorLocation(), GetActorLocation()) <= UseDistance) {
 			IInteractable::Execute_Interact(UseTarget);
@@ -225,7 +220,9 @@ void ABeatEmUpCharacter::UseThrusters(const FInputActionInstance& Instance)
 		ThrusterRefuelTimerHandle.Invalidate();
 		bThrustersRefuelling = false;
 	}
-	
+
+	// Adds force to Player as they hold thruster button,
+	// propelling them forward and decrementing fuel level
 	bThrustersEngaged = true;
 	bThrustersRefuelling = false;
 
@@ -234,12 +231,13 @@ void ABeatEmUpCharacter::UseThrusters(const FInputActionInstance& Instance)
 	
 	FVector ThrusterForce = GetActorForwardVector();
 	ThrusterForce.Normalize();
-	// ThrusterForce *= ThrusterForceScalar * ConsumedFuel;
 	ThrusterForce *= ThrusterForceScalar;
 	
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Overlap);
 	Cast<UCharacterMovementComponent>(GetMovementComponent())->AddForce(ThrusterForce);
-	
+
+	// If fuel tank is (near) depleted, start long refuel pause
+	// Encourages player to never fully deplete the tank
 	if (ThrusterFuel <= (ThrusterFuelLimit * 0.01f)) {
 
 		bThrustersReady = false;
@@ -253,22 +251,15 @@ void ABeatEmUpCharacter::UseThrusters(const FInputActionInstance& Instance)
 			false);
 	}
 	
-	// // Promote comparison to integer and multiply by scale which goes to zero
-	// // if condition fails, avoiding cond-branch
-	// DashChargeScalar = FMath::Clamp(
-	// 	(DashChargeRate * Instance.GetElapsedTime() * (+(DashChargeScalar < DashChargeLimit))) + DashChargeScalar,
-	// 	0.f,
-	// 	DashChargeLimit);
-	
 	InGameUI->UpdateValues();
 }
 
 void ABeatEmUpCharacter::DisengageThrusters()
 {
+	// If thrusters are disengaged early, set short refuel pause
 	bThrustersEngaged = false;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Block);
 	
-	// Short pause to start refilling if not fully depleted	
 	GetWorld()->GetTimerManager().SetTimer(
 			ThrusterRefuelTimerHandle,
 			this,
@@ -284,6 +275,10 @@ void ABeatEmUpCharacter::UnpauseThrusterRefuel() {
 
 void ABeatEmUpCharacter::FindUseTarget()
 {
+	// Highlights interactable AActors in the Player's LOS
+	// Also shows text prompt for the Player
+
+	// Unhighlight as we as new AActor my be non-interactable
 	if (UsePrompt) {
 		UsePrompt->RemoveFromParent();
 		UsePrompt = nullptr;
@@ -295,7 +290,8 @@ void ABeatEmUpCharacter::FindUseTarget()
 			Components[i]->SetRenderCustomDepth(false);
 		}
 	}
-	
+
+	// Find actors in current LOS using raycast
 	FVector Start = GetActorLocation();
 	FVector End = Start + GetFollowCamera()->GetForwardVector() * UseDistance;
 	
@@ -309,7 +305,6 @@ void ABeatEmUpCharacter::FindUseTarget()
 	TraceParams.bReturnPhysicalMaterial = false;
 	TraceParams.AddIgnoredActors(ActorsToIgnore);
 	TraceParams.TraceTag = FName("Use Find Trace Tag");
-	// GetWorld()->DebugDrawTraceTag = TraceParams.TraceTag;
 
 	if (bool bSweep = GetWorld()->LineTraceSingleByChannel(HitData, Start, End, ECC_Visibility, TraceParams)) {
 		if (HitData.GetActor()) {
@@ -353,23 +348,24 @@ void ABeatEmUpCharacter::AddEXP(int EXPToAdd)
 {
 	// TODO Modify thruster stats based on EXP
 	CurrentEXP += EXPToAdd;
-	
-    while (CurrentEXP > EXPToLevel) {
+
+	while (CurrentEXP > EXPToLevel) {
 		CurrentEXP -= EXPToLevel;
 		EXPToLevel *= IncreaseMultiplier;
 		PunchDamage *= IncreaseMultiplier;
 		MaxHealth *= IncreaseMultiplier;
 		CurrentHealth = MaxHealth;
 
-    	TArray<AActor*> EnemySpawners;
+		// Modify max enemies allowed in the world as the Player's XP level increases
+		TArray<AActor*> EnemySpawners;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), EnemySpawnerClass, EnemySpawners);
 
-    	for (auto* Actor : EnemySpawners) {
+		for (auto* Actor : EnemySpawners) {
 			if (AEnemySpawner* Spawner = Cast<AEnemySpawner>(Actor); Spawner != nullptr) {
 				Spawner->MaxEnemies = FMath::RoundToInt(Spawner->MaxEnemies * IncreaseMultiplier * 0.5f);
 			}
-    	}
-    }
+		}
+	}
 	
     InGameUI->UpdateValues();
 }

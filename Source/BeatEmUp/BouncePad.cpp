@@ -33,8 +33,6 @@ void ABouncePad::BeginPlay()
 	SpringReleaseTrigger->OnComponentBeginOverlap.AddDynamic(this, &ABouncePad::OnPadOverlapBegin);
 
 	Pad->SetSimulatePhysics(true);
-
-	// SpringReset();
 }
 
 // Called every frame
@@ -42,24 +40,6 @@ void ABouncePad::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-}
-
-void ABouncePad::SpringReset()
-{
-	// if (GEngine) {
-	// 	GEngine->AddOnScreenDebugMessage(
-	// 		1,
-	// 		100.0f,
-	// 		FColor::Yellow,
-	// 		FString::Printf(
-	// 			TEXT("BaseHeight: %.3f\nPadZPos: %.3f\nZScale: %.3f"),
-	// 			BaseHeight,
-	// 			PadZPos,
-	// 			ZScale));
-	// }
-	
-	// Spring->SetLinearPositionTarget(FVector(0.f, 0.f, CompressedTargetZPosition));
-	// Pad->WakeRigidBody();
 }
 
 void ABouncePad::OnPadOverlapBegin(
@@ -70,9 +50,13 @@ void ABouncePad::OnPadOverlapBegin(
 		bool bFromSweep,
 		const FHitResult & SweepResult)
 {
-
+	// If the pad mesh overlaps the trigger
+	// return early
 	if (OtherComp == Pad) { return; }
 
+	// Use LaunchCharacter on ACharacter objects
+	// and AddImpulse on other components to bounce
+	// objects off the spring.
 	if (ACharacter* Character = Cast<ACharacter>(OtherActor); Character != nullptr) {
 		const FVector LaunchVelocity = Character->GetActorUpVector() * (BounceForce * 0.75f);
 		Character->LaunchCharacter(LaunchVelocity,true, true);
@@ -82,12 +66,5 @@ void ABouncePad::OnPadOverlapBegin(
 		OtherComp->AddImpulse(LaunchVelocity);
 		OtherComp->SetSimulatePhysics(false);
 	}
-
-	// GetWorld()->GetTimerManager().SetTimer(
-	// 	SpringResetTimerHandle,
-	// 	this,
-	// 	&ABouncePad::SpringReset,
-	// 	SpringResetTime,
-	// 	false);
 }
 

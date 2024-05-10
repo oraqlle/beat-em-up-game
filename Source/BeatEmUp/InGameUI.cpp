@@ -20,6 +20,7 @@ void UInGameUI::UpdateValues()
 	
     PunchCooldown->SetPercent(1 - PunchTimePercentage);
 
+	// Updates the fuel bar according to how much fuel is left
 	ThrusterFuelBar->SetPercent(Player->ThrusterFuel / Player->ThrusterFuelLimit);
 
 	MaxHealthText->SetText(FText::FromString(FString::SanitizeFloat(Player->MaxHealth)));

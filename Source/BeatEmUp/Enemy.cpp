@@ -78,6 +78,8 @@ void AEnemy::OnOverlapBegin(
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
+	// Overlap collision channel used when Player is dashing to
+	// get different interactions
 	Ragdoll();
 	FVector LaunchDirection = GetActorLocation() - Player->GetActorLocation();
 	LaunchDirection.Normalize();

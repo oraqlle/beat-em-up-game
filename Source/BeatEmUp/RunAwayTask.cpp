@@ -7,6 +7,9 @@
 
 EBTNodeResult::Type URunAwayTask::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+    // Simple BT Task Node for generating a location
+    // for Enemies to run while being chased by the
+    // Player
     UBehaviorTreeComponent* BTComp = &OwnerComp;
     
     if (!BTComp)
