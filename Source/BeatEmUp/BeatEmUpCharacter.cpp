@@ -3,6 +3,7 @@
 #include "BeatEmUpCharacter.h"
 
 #include "Enemy.h"
+#include "EnemySpawner.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -359,6 +360,15 @@ void ABeatEmUpCharacter::AddEXP(int EXPToAdd)
 		PunchDamage *= IncreaseMultiplier;
 		MaxHealth *= IncreaseMultiplier;
 		CurrentHealth = MaxHealth;
+
+    	TArray<AActor*> EnemySpawners;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), EnemySpawnerClass, EnemySpawners);
+
+    	for (auto* Actor : EnemySpawners) {
+			if (AEnemySpawner* Spawner = Cast<AEnemySpawner>(Actor); Spawner != nullptr) {
+				Spawner->MaxEnemies = FMath::RoundToInt(Spawner->MaxEnemies * IncreaseMultiplier * 0.5f);
+			}
+    	}
     }
 	
     InGameUI->UpdateValues();

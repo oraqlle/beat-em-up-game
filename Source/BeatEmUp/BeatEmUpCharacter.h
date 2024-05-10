@@ -12,6 +12,7 @@
 #include "Logging/LogMacros.h"
 #include "BeatEmUpCharacter.generated.h"
 
+class AEnemySpawner;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -143,6 +144,9 @@ public:
 	
     UPROPERTY(EditAnywhere)
     float IncreaseMultiplier = 1.5;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AEnemySpawner> EnemySpawnerClass;
 	
 	UPROPERTY(EditAnywhere)
     UInputAction* PauseAction;
