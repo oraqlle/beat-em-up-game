@@ -6,6 +6,7 @@
 #include "BeatEmUpCharacter.h"
 #include "Bullet.h"
 #include "DamageTextUI.h"
+#include "DynamicSpotlight.h"
 #include "HealthPack.h"
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
@@ -50,6 +51,12 @@ public:
 
 	UPROPERTY(EditAnywhere)
     TSubclassOf<AHealthPack> HealthPackClass;
+
+	UPROPERTY(EditAnywhere)
+    TSubclassOf<ADynamicSpotlight> DynamicSpotlightClass;
+	
+    UPROPERTY()
+    ADynamicSpotlight* Spotlight;
 
 protected:
 	// Called when the game starts or when spawned

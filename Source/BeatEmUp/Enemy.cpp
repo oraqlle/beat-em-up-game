@@ -28,6 +28,13 @@ void AEnemy::BeginPlay()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
     GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AEnemy::OnHit);
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnOverlapBegin);
+
+	if (DynamicSpotlightClass)
+    {
+	    const FVector SpawnLocation = GetActorLocation();
+		Spotlight = Cast<ADynamicSpotlight>(GetWorld()->SpawnActor(DynamicSpotlightClass, &SpawnLocation));
+		Spotlight->TargetActor = this;
+    }
 }
 
 // Called every frame
@@ -121,7 +128,9 @@ void AEnemy::StopRagdoll()
 		if (HealthPackClass) {
 			FVector SpawnLocation = GetMesh()->GetComponentLocation() + FVector(0,0,50);
 			GetWorld()->SpawnActor(HealthPackClass, &SpawnLocation);
-		}	
+		}
+		
+		Spotlight->Destroy();
 		
 		Destroy();
 		return;
