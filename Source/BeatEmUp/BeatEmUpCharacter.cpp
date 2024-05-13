@@ -12,6 +12,7 @@
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "NiagaraComponent.h"
 #include "InputActionValue.h"
 #include "Interactable.h"
 #include "Kismet/GameplayStatics.h"
@@ -146,6 +147,16 @@ void ABeatEmUpCharacter::Punch()
 					HitEnemy->DealDamage(PunchDamage);
 				}
 			}
+		}
+		
+		if (PunchEffectClass) {
+			UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(),
+				PunchEffectClass,
+				GetActorLocation(),
+				GetActorRotation());
+			
+			SpawnedEffect->SetColorParameter(FName("User.SpawnColour"), FLinearColor::MakeRandomColor());
 		}
     }
 }

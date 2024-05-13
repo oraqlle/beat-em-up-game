@@ -9,6 +9,7 @@
 #include "PauseMenu.h"
 #include "UsePromptUI.h"
 #include "GameFramework/Character.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Logging/LogMacros.h"
 #include "BeatEmUpCharacter.generated.h"
 
@@ -153,6 +154,9 @@ public:
 	
     UPROPERTY(EditAnywhere)
     TSubclassOf<UPauseMenu> PauseMenuClass;
+
+	UPROPERTY(EditAnywhere)
+    UNiagaraSystem* PunchEffectClass;
 
 protected:
 

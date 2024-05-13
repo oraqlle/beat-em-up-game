@@ -18,7 +18,8 @@ public class BeatEmUp : ModuleRules
 			"UMG",
 			"NavigationSystem",
 			"AIModule",
-			"GameplayTasks"
+			"GameplayTasks",
+			"Niagara"
 		});
 	}
 }
