@@ -5,6 +5,7 @@
 
 #include "BrainComponent.h"
 #include "EnemyBTController.h"
+#include "NiagaraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -105,9 +106,23 @@ void AEnemy::Ragdoll()
 
 void AEnemy::StopRagdoll()
 {
-	if (CurrentHealth <= 0)
-    {
+	if (CurrentHealth <= 0) {
 		Player->AddEXP(EXPAmount);
+
+		if (DeathParticleClass) {
+			UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(),
+				DeathParticleClass,
+				GetMesh()->GetComponentLocation());
+			
+			SpawnedEffect->SetColorParameter(FName("User.SpawnColour"), FLinearColor::MakeRandomColor());
+        }
+
+		if (HealthPackClass) {
+			FVector SpawnLocation = GetMesh()->GetComponentLocation() + FVector(0,0,50);
+			GetWorld()->SpawnActor(HealthPackClass, &SpawnLocation);
+		}	
+		
 		Destroy();
 		return;
     }
