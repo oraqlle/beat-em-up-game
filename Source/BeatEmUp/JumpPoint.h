@@ -18,4 +18,6 @@ public:
 	
     UFUNCTION()
     void LinkReached(AActor* Agent, const FVector& Destination);
+
+	void CopyLinkPoints();
 };
