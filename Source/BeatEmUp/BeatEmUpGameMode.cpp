@@ -72,7 +72,8 @@ void ABeatEmUpGameMode::Load(UBeatEmUpSaveGame* LoadedGame)
 
 void ABeatEmUpGameMode::Save(UBeatEmUpSaveGame* SaveGame)
 {
-	ABeatEmUpCharacter* PlayerCharacter = Cast<ABeatEmUpCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	ABeatEmUpCharacter* PlayerCharacter = Cast<ABeatEmUpCharacter>(
+		GetWorld()->GetFirstPlayerController()->GetPawn());
 	
     SaveGame->PlayerPosition = PlayerCharacter->GetActorLocation();
     SaveGame->PlayerRotation = PlayerCharacter->GetActorRotation();
@@ -95,7 +96,7 @@ void ABeatEmUpGameMode::Save(UBeatEmUpSaveGame* SaveGame)
 	
     for (int i = 0; i < Enemies.Num(); i++)
     {
-		AEnemy* CurrentEnemy = Cast<AEnemy>(Enemies[i]);
+	    const AEnemy* CurrentEnemy = Cast<AEnemy>(Enemies[i]);
     	
 		SaveGame->EnemyLocations.Add(CurrentEnemy->GetActorLocation());
 		SaveGame->EnemyRotations.Add(CurrentEnemy->GetActorRotation());
@@ -119,8 +120,8 @@ void ABeatEmUpGameMode::PostBeginPlay()
 	
     if (GameInstance) {
 		if (GameInstance->bLoadSave) {
-			UBeatEmUpSaveGame* LoadedGame = Cast<UBeatEmUpSaveGame>(UGameplayStatics::LoadGameFromSlot("TestSave",0));
-			if (LoadedGame) {
+			if (UBeatEmUpSaveGame* LoadedGame = Cast<UBeatEmUpSaveGame>(
+				UGameplayStatics::LoadGameFromSlot("Save",0))) {
 				Load(LoadedGame);
 			}
 		}

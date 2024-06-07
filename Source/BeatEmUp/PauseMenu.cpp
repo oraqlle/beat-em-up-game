@@ -26,14 +26,11 @@ void UPauseMenu::ContinueButtonClick()
 
 void UPauseMenu::SaveButtonClick()
 {
-	UBeatEmUpSaveGame* SaveGameInstance = Cast<UBeatEmUpSaveGame>(UGameplayStatics::CreateSaveGameObject(UBeatEmUpSaveGame::StaticClass()));
-	
-    if (SaveGameInstance) {
-    ABeatEmUpGameMode* BeatEmUpGameMode = Cast<ABeatEmUpGameMode>(GetWorld()->GetAuthGameMode());
-    	
-		if (BeatEmUpGameMode) {
+	if (UBeatEmUpSaveGame* SaveGameInstance = Cast<UBeatEmUpSaveGame>(
+		UGameplayStatics::CreateSaveGameObject(UBeatEmUpSaveGame::StaticClass()))) {
+		if (ABeatEmUpGameMode* BeatEmUpGameMode = Cast<ABeatEmUpGameMode>(GetWorld()->GetAuthGameMode())) {
 			BeatEmUpGameMode->Save(SaveGameInstance);
-			UGameplayStatics::SaveGameToSlot(SaveGameInstance,"TestSave", 0);
+			UGameplayStatics::SaveGameToSlot(SaveGameInstance,"Save", 0);
 		}
     }
 }
