@@ -3,6 +3,9 @@
 
 #include "Bomb.h"
 
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+
 // Sets default values
 ABomb::ABomb()
 {
@@ -36,6 +39,14 @@ void ABomb::Tick(float DeltaTime)
 
 void ABomb::Explode()
 {
+	if (ExplosionEffectClass) {
+		[[maybe_unused]] UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			ExplosionEffectClass,
+			GetActorLocation(),
+			GetActorRotation());
+	}
+	
 	Destroy();
 }
 
