@@ -30,10 +30,10 @@ public:
 	float Damage = 7;
 
 	UPROPERTY(EditAnywhere)
-	float DamageRadius = 1000;
+	float ExplosionRadius = 750;
 
 	UPROPERTY(EditAnywhere)
-	float KnockBackForce;
+	float KnockBackForce = 10000;
 	
 	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* ExplosionEffectClass;

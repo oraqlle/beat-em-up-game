@@ -3,8 +3,10 @@
 
 #include "Bomb.h"
 
+#include "Enemy.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Engine/StaticMeshActor.h"
 
 // Sets default values
 ABomb::ABomb()
@@ -39,6 +41,48 @@ void ABomb::Tick(float DeltaTime)
 
 void ABomb::Explode()
 {
+	
+	TArray<FHitResult> HitResults;
+	// const FVector Start = GetActorLocation();
+	// const FVector End = Start + GetActorForwardVector() * ExplosionRadius;
+	const FCollisionShape SphereShape = FCollisionShape::MakeSphere(ExplosionRadius);
+	[[maybe_unused]] const bool bSweep = GetWorld()->SweepMultiByChannel(
+		HitResults,
+		GetActorLocation(),
+		GetActorLocation(),
+		GetActorQuat(),
+		ECC_WorldDynamic,
+		SphereShape);
+
+	TArray<AActor*> HitThisPunch;
+	for(FHitResult HitResult : HitResults)
+	{
+		if (HitResult.GetActor() != this && !HitThisPunch.Contains(HitResult.GetActor()))
+		{
+			HitThisPunch.Add(HitResult.GetActor());
+			
+			if (AEnemy* HitEnemy = Cast<AEnemy>(HitResult.GetActor())) {
+				HitEnemy->Ragdoll();
+				FVector LaunchDirection = HitEnemy->GetActorLocation() - GetActorLocation();
+				LaunchDirection.Normalize();
+				LaunchDirection *= 3;
+				LaunchDirection += FVector::UpVector;
+				HitEnemy->GetMesh()->AddImpulse(LaunchDirection * KnockBackForce * 2);
+				HitEnemy->DealDamage(Damage);
+			} else if (ABeatEmUpCharacter* HitPlayer = Cast<ABeatEmUpCharacter>(HitResult.GetActor())) {
+				HitPlayer->DealDamage(Damage);
+			} else if (AActor* HitActor = HitResult.GetActor(); HitActor->GetRootComponent()->IsSimulatingPhysics()) {
+				if (AStaticMeshActor* HitStaticMeshActor = Cast<AStaticMeshActor>(HitActor)) {
+					FVector LaunchDirection = HitActor->GetActorLocation() - GetActorLocation();
+					LaunchDirection.Normalize();
+					LaunchDirection *= 3;
+					LaunchDirection += FVector::UpVector;
+					HitStaticMeshActor->GetStaticMeshComponent()->AddImpulse(LaunchDirection * KnockBackForce);
+				}
+			}
+		}
+	}
+	
 	if (ExplosionEffectClass) {
 		[[maybe_unused]] UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 			GetWorld(),
