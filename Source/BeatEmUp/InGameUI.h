@@ -39,6 +39,12 @@ public:
 	
 	UPROPERTY(meta = (BindWidget))
     UProgressBar* EXPBar;
+
+	UPROPERTY(meta = (BindWidget))
+	UProgressBar* BombReload;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* BombCountText;
 	
     void UpdateValues();
 };

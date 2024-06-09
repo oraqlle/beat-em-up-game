@@ -11,8 +11,7 @@ void UInGameUI::UpdateValues()
 	
     float PunchTimePercentage = 0;
 	
-    if (GetWorld()->GetTimerManager().TimerExists(Player->PunchCooldownTimerHandle))
-    {
+    if (GetWorld()->GetTimerManager().TimerExists(Player->PunchCooldownTimerHandle)) {
 		PunchTimePercentage = GetWorld()
     		->GetTimerManager()
     		.GetTimerRemaining(Player->PunchCooldownTimerHandle) / Player->PunchCooldown;
@@ -25,4 +24,14 @@ void UInGameUI::UpdateValues()
 
 	MaxHealthText->SetText(FText::FromString(FString::SanitizeFloat(Player->MaxHealth)));
 	EXPBar->SetPercent(static_cast<float>(Player->CurrentEXP) / Player->EXPToLevel);
+
+	float BombReloadPercentage = 0.f;
+	if (GetWorld()->GetTimerManager().TimerExists(Player->BombReloadTimerHandle)) {
+		BombReloadPercentage = GetWorld()
+			->GetTimerManager()
+			.GetTimerRemaining(Player->BombReloadTimerHandle) / Player->BombReloadTime;
+	}
+
+	BombReload->SetPercent(1 - BombReloadPercentage);
+	BombCountText->SetText(FText::FromString(FString::Printf(TEXT("Bombs: %d"), Player->BombAmmo)));
 }

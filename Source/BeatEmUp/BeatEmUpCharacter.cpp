@@ -88,11 +88,15 @@ void ABeatEmUpCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// Update UI during Punch cooldown
-	if (GetWorld()->GetTimerManager().TimerExists(PunchCooldownTimerHandle))
-    {
-		InGameUI->UpdateValues();
-    }
+	// Update UI during Punch cooldown or reloading bombs
+	bool bUpdateUI = GetWorld()
+		->GetTimerManager()
+		.TimerExists(PunchCooldownTimerHandle)
+	|| GetWorld()
+		->GetTimerManager()
+		.TimerExists(BombReloadTimerHandle);
+	
+	if (bUpdateUI) { InGameUI->UpdateValues(); }
 
 	// Slowly refuel thruster fuel level, update UI accordingly
 	if (bThrustersRefuelling) {
@@ -197,12 +201,16 @@ void ABeatEmUpCharacter::ThrowBomb()
 
 		bBombReady = false;
 	}
+
+	InGameUI->UpdateValues();
 }
 
 void ABeatEmUpCharacter::ReloadBombs()
 {
 	bBombReady = true;
 	BombAmmo = MaxBombAmmo;
+
+	InGameUI->UpdateValues();
 }
 
 void ABeatEmUpCharacter::DealDamage(const float Damage)

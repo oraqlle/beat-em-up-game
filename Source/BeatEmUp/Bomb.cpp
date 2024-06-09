@@ -14,7 +14,6 @@ ABomb::ABomb()
 	MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Movement Component"));
 
 	MovementComponent->bShouldBounce= true;
-	MovementComponent->BounceVelocityStopSimulatingThreshold = MovementSpeed / 3;
 	MovementComponent->bSweepCollision = true;
 	MovementComponent->InitialSpeed = MovementSpeed;
 	MovementComponent->UpdatedComponent = Mesh;
@@ -37,5 +36,6 @@ void ABomb::Tick(float DeltaTime)
 
 void ABomb::Explode()
 {
+	Destroy();
 }
 

@@ -24,7 +24,7 @@ public:
 	UStaticMeshComponent* Mesh;
 
 	UPROPERTY(EditAnywhere)
-	float MovementSpeed = 500;
+	float MovementSpeed = 1000;
 
 	UPROPERTY(EditAnywhere)
 	float Damage = 7;
