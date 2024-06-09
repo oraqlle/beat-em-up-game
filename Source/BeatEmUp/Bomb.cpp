@@ -45,6 +45,9 @@ void ABomb::Explode()
 			ExplosionEffectClass,
 			GetActorLocation(),
 			GetActorRotation());
+
+		SpawnedEffect->SetColorParameter("User.PrimaryColour", FLinearColor::MakeRandomColor());
+		SpawnedEffect->SetColorParameter("User.SecondaryColour", FLinearColor::MakeRandomColor());
 	}
 	
 	Destroy();
