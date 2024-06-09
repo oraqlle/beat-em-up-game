@@ -50,16 +50,14 @@ void ABullet::OnHit(
 	{
 		AEnemy* HitEnemy = Cast<AEnemy>(OtherActor);
 		
-		if (HitEnemy)
-		{
+		if (HitEnemy) {
 			HitEnemy->DealDamage(Damage);
 			Destroy();
 		}
 		
 		ABeatEmUpCharacter* HitCharacter = Cast<ABeatEmUpCharacter>(OtherActor);
 		
-		if (HitCharacter)
-		{
+		if (HitCharacter) {
 			HitCharacter->DealDamage(Damage);
 			Destroy();
 		}

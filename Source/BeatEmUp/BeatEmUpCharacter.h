@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Bomb.h"
 #include "InGameUI.h"
 #include "InputAction.h"
 #include "Interactable.h"
@@ -158,6 +159,24 @@ public:
 	UPROPERTY(EditAnywhere)
     UNiagaraSystem* PunchEffectClass;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ABomb> BombClass;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* ThrowBombAction;
+	
+	UPROPERTY(EditAnywhere)
+	uint32 MaxBombAmmo = 3;
+
+	uint32 BombAmmo = MaxBombAmmo;
+	
+	UPROPERTY(EditAnywhere)
+	float BombReloadTime = 5;
+
+	FTimerHandle BombReloadTimerHandle;
+
+	bool bBombReady = true;
+
 protected:
 
 	/** Called for movement input */
@@ -186,6 +205,12 @@ public:
 	
     UFUNCTION()
     void ResetPunch();
+	
+	UFUNCTION()
+	void ThrowBomb();
+
+	UFUNCTION()
+	void ReloadBombs();
 	
     void DealDamage(float Damage);
 	

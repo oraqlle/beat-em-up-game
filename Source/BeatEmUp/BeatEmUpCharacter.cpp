@@ -2,6 +2,7 @@
 
 #include "BeatEmUpCharacter.h"
 
+#include "Bomb.h"
 #include "Enemy.h"
 #include "EnemySpawner.h"
 #include "Engine/LocalPlayer.h"
@@ -167,6 +168,43 @@ void ABeatEmUpCharacter::ResetPunch()
 	InGameUI->UpdateValues();
 }
 
+void ABeatEmUpCharacter::ThrowBomb()
+{
+	if (!bBombReady) { return; }
+
+	FVector Direction = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector();
+	const FVector SpawnLocation = GetActorLocation() + Direction * 100;
+	const FRotator SpawnRotation = GetActorRotation();
+	ABomb* SpawnedBomb = Cast<ABomb>(GetWorld()->SpawnActor(BombClass, &SpawnLocation, &SpawnRotation));
+	Direction.Normalize();
+	SpawnedBomb->MovementComponent->Velocity = Direction * SpawnedBomb->MovementSpeed;
+	
+	GetWorld()->GetTimerManager().SetTimer(
+		SpawnedBomb->FuseTimerHandle,
+		SpawnedBomb,
+		&ABomb::Explode,
+		SpawnedBomb->FuseTime,
+		false);
+
+	BombAmmo -= 1u;
+	if (BombAmmo == 0u) {
+		GetWorld()->GetTimerManager().SetTimer(
+			BombReloadTimerHandle,
+			this,
+			&ABeatEmUpCharacter::ReloadBombs,
+			BombReloadTime,
+			false);
+
+		bBombReady = false;
+	}
+}
+
+void ABeatEmUpCharacter::ReloadBombs()
+{
+	bBombReady = true;
+	BombAmmo = MaxBombAmmo;
+}
+
 void ABeatEmUpCharacter::DealDamage(const float Damage)
 {
 	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0, MaxHealth);
@@ -234,6 +272,7 @@ void ABeatEmUpCharacter::UseThrusters(const FInputActionInstance& Instance)
 
 	// Adds force to Player as they hold thruster button,
 	// propelling them forward and decrementing fuel level
+	// N.B. could merge of thruster fuel flags into bitset
 	bThrustersEngaged = true;
 	bThrustersRefuelling = false;
 
@@ -422,12 +461,32 @@ void ABeatEmUpCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Thruster Charge Attack		
 		// Thrusters Engaged
-		EnhancedInputComponent->BindAction(ThrusterChargeAction, ETriggerEvent::Triggered, this, &ABeatEmUpCharacter::UseThrusters);
+		EnhancedInputComponent->BindAction(
+			ThrusterChargeAction,
+			ETriggerEvent::Triggered,
+			this,
+			&ABeatEmUpCharacter::UseThrusters);
+		
 		// Thrusters Disengaged
-		EnhancedInputComponent->BindAction(ThrusterChargeAction, ETriggerEvent::Completed, this, &ABeatEmUpCharacter::DisengageThrusters);
+		EnhancedInputComponent->BindAction(
+			ThrusterChargeAction,
+			ETriggerEvent::Completed,
+			this,
+			&ABeatEmUpCharacter::DisengageThrusters);
 
 		// Pause Game
-		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Started, this, &ABeatEmUpCharacter::PauseGame);
+		EnhancedInputComponent->BindAction(
+			PauseAction,
+			ETriggerEvent::Started,
+			this,
+			&ABeatEmUpCharacter::PauseGame);
+
+		// Throw Bomb
+		EnhancedInputComponent->BindAction(
+			ThrowBombAction,
+			ETriggerEvent::Started,
+			this,
+			&ABeatEmUpCharacter::ThrowBomb);
 	}
 	else
 	{
