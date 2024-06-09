@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "NiagaraSystem.h"
+#include "Components/PointLightComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Bomb.generated.h"
@@ -22,6 +23,15 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* Mesh;
+
+	UPROPERTY(EditAnywhere)
+	UPointLightComponent* PointLight;
+	
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* FlickeringLightMaterialClass;
+	
+	UPROPERTY()
+	UMaterialInstanceDynamic* FlickeringLightMaterialInstance;
 
 	UPROPERTY(EditAnywhere)
 	float MovementSpeed = 1000;

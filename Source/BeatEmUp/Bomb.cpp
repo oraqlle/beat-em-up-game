@@ -16,13 +16,16 @@ ABomb::ABomb()
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	RootComponent = Mesh;
+	
 	MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Movement Component"));
-
 	MovementComponent->bShouldBounce= true;
 	MovementComponent->bSweepCollision = true;
 	MovementComponent->InitialSpeed = MovementSpeed;
 	MovementComponent->UpdatedComponent = Mesh;
 	MovementComponent->ProjectileGravityScale = 0.5f;
+	
+	PointLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("Point Light"));
+	PointLight->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -30,6 +33,12 @@ void ABomb::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	PointLight->SetLightColor(FLinearColor(255.f, 0.f, 0.f));
+	
+	if (FlickeringLightMaterialClass) {
+		FlickeringLightMaterialInstance = UMaterialInstanceDynamic::Create(FlickeringLightMaterialClass, this);
+		PointLight->SetLightFunctionMaterial(FlickeringLightMaterialInstance);
+	}
 }
 
 // Called every frame
@@ -37,6 +46,11 @@ void ABomb::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (FlickeringLightMaterialInstance) {
+		FlickeringLightMaterialInstance->SetScalarParameterValue(
+			FName(TEXT("Flicker Rate")),
+			GetWorld()->GetTimerManager().GetTimerElapsed(FuseTimerHandle) / 2.35f);
+	}
 }
 
 void ABomb::Explode()
@@ -96,4 +110,3 @@ void ABomb::Explode()
 	
 	Destroy();
 }
-
