@@ -2,12 +2,12 @@
 
 ## Controls
 
-- <WASD> - Forwards, backwards, left and right strafing
-- <space> - Jump
-- <left-click> - Punch Attack
-- <right-click> - Interact
-- <e> - Throw bombs
-- <left-shift> - Engage thrusters
+- `<WASD>` - Forwards, backwards, left and right strafing
+- `<space>` - Jump
+- `<left-click>` - Punch Attack
+- `<right-click>` - Interact
+- `<e>` - Throw bombs
+- `<left-shift>` - Engage thrusters
 
 ## Mechanics to be Assessed
 
