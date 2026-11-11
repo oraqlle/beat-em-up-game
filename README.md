@@ -1,5 +1,11 @@
 # Arena Battle - Infinite
 
+## Demo
+
+*Excuse the poor video quality*
+
+https://github.com/user-attachments/assets/f63aa369-634f-4107-ae0f-fa8f82ac1592
+
 ## Controls
 
 - `<WASD>` - Forwards, backwards, left and right strafing
